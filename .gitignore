@@ -26,3 +26,10 @@ node_modules
 
 # Users Environment Variables
 .lock-wscript
+
+# Vim
+*.swp
+
+# JavaScript
+# Excluding the compiled TypeScript
+*.js
