@@ -5,3 +5,4 @@
 * [python marshal](http://daeken.com/2010-02-20_Python_Marshal_Format.html)
 * [code objects] (http://late.am/post/2012/03/26/exploring-python-code-objects)
 * https://github.com/jvilk/BrowserFS
+* https://docs.python.org/2/c-api/structures.html
