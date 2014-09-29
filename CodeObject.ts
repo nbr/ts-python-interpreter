@@ -5,9 +5,6 @@ class PycFile{
   private modtime: Date;
   private codeobj: CodeObject;
 
-  //Implementation variables
-  private fileWrapper: FileWrapper;
-
   constructor(magicno: any, modtime: Date, codeobj: CodeObject){
     this.magicno = magicno;
     this.modtime = modtime;
