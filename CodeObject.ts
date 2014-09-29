@@ -8,19 +8,47 @@ class PycFile{
   //Implementation variables
   private fileWrapper: FileWrapper;
 
-  constructor(fileWrapper: FileWrapper){
-    this.fileWrapper = fileWrapper;
-    this.parseMagicNumber();
-    this.parseModTimeStamp();
-    this.codeobj = new CodeObject(this.fileWrapper);
-  }
-  private parseMagicNumber(){
-  }
-  private parseModTimeStamp(){
+  constructor(magicno: any, modtime: Date, codeobj: CodeObject){
+    this.magicno = magicno;
+    this.modtime = modtime;
+    this.codeobj = codeobj;
   }
   interpret(){
     this.codeobj.execute();
   }
+}
+class PycParser{
+  private mp: MarshalParser;
+
+  constructor(){
+    this.mp = new MarshalParser();
+  }
+  parse(fileWrapper: FileWrapper): PycFile{
+    var magicno: any = this.parseMagicNumber(fileWrapper);
+    var modtime: Date = this.parseModTimeStamp(fileWrapper);
+    var codeobj: CodeObject = this.mp.parse(fileWrapper);
+  return new PycFile(magicno, modtime, codeobj);
+  }
+  private parseMagicNumber(fileWrapper: FileWrapper): any{
+    return 0;
+  }
+  private parseModTimeStamp(fileWrapper: FileWrapper): Date{
+    return new Date();
+  }
+}
+class MarshalParser{
+  //pseudo code
+  //private funcMap = {'i':int32,...}
+  parse(fileWrapper: FileWrapper): any{
+    //pseudo code
+    //return funcMap[read char](fileWrapper);
+  }
+  //pseudo code
+  //int32(fileWrapper: FileWrapper): number{
+  //}
+  //codeobj(fileWrapper: FileWrapper): CodeObject{
+  //  can be recursive
+  //}
 }
 class CodeObject{
   //thanks to http://daeken.com/2010-02-20_Python_Marshal_Format.html
@@ -30,20 +58,17 @@ class CodeObject{
   private stacksize: number;
   private flags: number; //figure out bit operations or maybe switch to enums
   private code: StackOp[];
-  //blog refers to each of the following as being tuples which he
-  //defines as a collection of marshalled objects
-  private consts: Tuple<CodeObject>; //why are these marshalled objects rather than connstants listed in his blog?
-  private names: Tuple<CodeObject>; //why aren't these strings as in python?
-  private varnames: Tuple<CodeObject>; //why aren't these strings as in python?
-  private freevars: Tuple<CodeObject>;
-  private cellvars: Tuple<CodeObject>;
+  private consts: Tuple<any>;
+  private names: Tuple<string>; //pretty sure only strings here
+  private varnames: Tuple<string>; //pretty sure only strings here
+  private freevars: Tuple<any>;
+  private cellvars: Tuple<any>;
   private filename: string;
   private name: string;
   private firstlineno: number;
   private lnotab: CodeOffsetToLineNoMap;
 
   //Implementation variables
-  private fileWrapper: FileWrapper;
   //Looking at CALL_FUNCTION of dis it seems as though
   //each code object should have its own stack machine
   //since it pops arguments and function and pushes 
@@ -51,11 +76,10 @@ class CodeObject{
   //stack machine.
   private stackMachine: StackMachine;
   
-  constructor(fileWrapper: FileWrapper){
-    this.fileWrapper = fileWrapper;
-    this.parse();
-  }
-  private parse(){
+  //Look into factory pattern?
+  constructor(/*dict containing all the fields*/){
+    //fill in fields
+    this.stackMachine = new StackMachine();
   }
   execute(){
   }
@@ -117,5 +141,6 @@ class Tuple<T>{
   }
 }
 
-var pyc = new PycFile(new FileWrapperNode('/path/to/pyc/file'));
+var pycParser = new PycParser();
+var pyc = pycParser.parse(new FileWrapperNode('/path/to/pyc/file'));
 pyc.interpret();
