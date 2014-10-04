@@ -14,36 +14,55 @@ class PycFile{
     this.codeobj.execute();
   }
 }
-class PycParser{
-  private mp: MarshalParser;
-
-  constructor(){
-    this.mp = new MarshalParser();
+module PycParser{
+  export function parse(fw: FileWrapper): PycFile{
+    var magicno: any = this.parseMagicNumber(fw);
+    var modtime: Date = this.parseModTimeStamp(fw);
+    var codeobj: CodeObject = this.mp.parse(fw);
+    return new PycFile(magicno, modtime, codeobj);
   }
-  parse(fileWrapper: FileWrapper): PycFile{
-    var magicno: any = this.parseMagicNumber(fileWrapper);
-    var modtime: Date = this.parseModTimeStamp(fileWrapper);
-    var codeobj: CodeObject = this.mp.parse(fileWrapper);
-  return new PycFile(magicno, modtime, codeobj);
+  function parseMagicNumber(fw: FileWrapper): any{
+    var magicno: number = fw.getInt32();
+    return magicno;
   }
-  private parseMagicNumber(fileWrapper: FileWrapper): any{
-    return 0;
-  }
-  private parseModTimeStamp(fileWrapper: FileWrapper): Date{
-    return new Date();
+  function parseModTimeStamp(fw: FileWrapper): Date{
+    //this probably isn't the correct parsing,
+    //but as long as correct number of bytes consumed,
+    //I don't care right now
+    return new Date(fw.getInt32());
   }
 }
-class MarshalParser{
-  //pseudo code
-  //private funcMap = {'i':int32,...}
-  parse(fileWrapper: FileWrapper): any{
-    //pseudo code
-    //return funcMap[read char](fileWrapper);
+module MarshalParser{
+  export enum Constants {
+    Null,
+    None,
+    False,
+    True,
+    Stopiter,
+    Ellipsis
   }
-  //pseudo code
-  //int32(fileWrapper: FileWrapper): number{
-  //}
-  //codeobj(fileWrapper: FileWrapper): CodeObject{
+  var funcMap = {
+    'O': function typeNull(fw: FileWrapper){ return Constants.Null; },
+    'N': function typeNone(fw: FileWrapper){ return Constants.None; },
+    'F': function typeFalse(fw: FileWrapper){ return Constants.False; },
+    'T': function typeTrue(fw: FileWrapper){ return Constants.True; },
+    'S': function typeStopiter(fw: FileWrapper){ return Constants.Stopiter; },
+    '.': function typeEllipsis(fw: FileWrapper){ return Constants.Ellipsis; },
+    'i': typeInt,
+    'I': typeInt64
+  };
+  export function parse(fw: FileWrapper): any{
+    return funcMap[fw.getUInt8()](fw);
+  }
+  function typeInt(fw: FileWrapper): number{
+    return fw.getInt32();
+  }
+  //returning any right now because we haven't
+  //decided how to represent 64 bit ints
+  function typeInt64(fw: FileWrapper): any{
+    return fw.getInt64();
+  }
+  //function codeobj(fw: FileWrapper): CodeObject{
   //  can be recursive
   //}
 }
@@ -87,8 +106,6 @@ class StackOp{
 }
 enum OpCode{
 };
-enum Constants{
-};
 interface CodeOffsetToLineNoMap{
   [index: number]: number;
 }
@@ -97,9 +114,15 @@ class StackMachine{
 interface FileWrapper{
   getInt32: GetNumber;
   getUInt8: GetNumber;
+  //we need to change this when we know 64 bit int representation
+  getInt64: GetNumber;
+  getUtf8: GetString;
 }
 interface GetNumber{
   (): number;
+}
+interface GetString{
+  (): string;
 }
 class FileWrapperNode{
   private buffer: any; //type?
@@ -119,6 +142,15 @@ class FileWrapperNode{
   }
   getUInt8(): number{
     return this.readNum(this.buffer.readUInt8, 1);
+  }
+  getInt64(): any{
+    //This is incorrect. How will we represent 64 bit ints?
+    return this.readNum(this.buffer.readDoubleLE, 8);
+  }
+  getUtf8(): string{
+    var c: string = this.buffer.toSting('utf8', this.offset, this.offset + 1);
+    this.offset++;
+    return c;
   }
   private readNum(readFunc: ReadFunc, offsetIncrease: number): number{
     var n = readFunc.call(this.buffer, this.offset, true);
@@ -152,7 +184,6 @@ class Tuple<T>{
 
 var fw = new FileWrapperNode('/path/to/pyc/file');
 fw.connect(function afterConnect(fw: FileWrapper){
-  var pycParser: PycParser = new PycParser();
-  var pyc: PycFile = pycParser.parse(fw);
+  var pyc: PycFile = PycParser.parse(fw);
   pyc.interpret();
 });
