@@ -104,22 +104,34 @@ interface GetNumber{
 class FileWrapperNode{
   private buffer: any; //type?
   private offset: number;
+  private path: string;
 
   constructor(path: string){
-    var fs = require('fs');
-    this.buffer = fs.readFileSync(path);
     this.offset = 0;
+    this.path = path;
+  }
+  connect(cb){
+    var fs = require('fs');
+    fs.readFile(this.path, this.getAfterRead(cb));
   }
   getInt32(): number{
-    return this.readNum(this.buffer.readInt32LE,4);
+    return this.readNum(this.buffer.readInt32LE, 4);
   }
   getUInt8(): number{
-    return this.readNum(this.buffer.readUInt8,1);
+    return this.readNum(this.buffer.readUInt8, 1);
   }
   private readNum(readFunc: ReadFunc, offsetIncrease: number): number{
-    var n = readFunc.call(this.buffer,this.offset,true);
+    var n = readFunc.call(this.buffer, this.offset, true);
     this.offset += offsetIncrease;
     return n;
+  }
+  private getAfterRead(cb){
+    var fwn: FileWrapperNode = this;
+    return function afterRead(err, buffer){
+      if (err) { throw err;}
+      fwn.buffer = buffer;
+      cb();
+    };
   }
 }
 interface ReadFunc{
@@ -138,6 +150,9 @@ class Tuple<T>{
   }
 }
 
-var pycParser = new PycParser();
-var pyc = pycParser.parse(new FileWrapperNode('/path/to/pyc/file'));
-pyc.interpret();
+var fw = new FileWrapperNode('/path/to/pyc/file');
+fw.connect(function afterConnect(fw: FileWrapper){
+  var pycParser: PycParser = new PycParser();
+  var pyc: PycFile = pycParser.parse(fw);
+  pyc.interpret();
+});
