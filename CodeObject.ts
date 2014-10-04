@@ -41,7 +41,7 @@ module MarshalParser{
     Stopiter,
     Ellipsis
   }
-  var funcMap = {
+  var typeParserMap = {
     'O': function typeNull(fw: FileWrapper){ return Constants.Null; },
     'N': function typeNone(fw: FileWrapper){ return Constants.None; },
     'F': function typeFalse(fw: FileWrapper){ return Constants.False; },
@@ -49,10 +49,12 @@ module MarshalParser{
     'S': function typeStopiter(fw: FileWrapper){ return Constants.Stopiter; },
     '.': function typeEllipsis(fw: FileWrapper){ return Constants.Ellipsis; },
     'i': typeInt,
-    'I': typeInt64
+    'I': typeInt64,
+    'f': typeFloat,
+    'g': typeBinaryFloat
   };
   export function parse(fw: FileWrapper): any{
-    return funcMap[fw.getUInt8()](fw);
+    return typeParserMap[fw.getUInt8()](fw);
   }
   function typeInt(fw: FileWrapper): number{
     return fw.getInt32();
@@ -60,11 +62,79 @@ module MarshalParser{
   //returning any right now because we haven't
   //decided how to represent 64 bit ints
   function typeInt64(fw: FileWrapper): any{
-    return fw.getInt64();
+    //figure out how to represent 64 bit int
+    var first4: number = fw.getInt32();
+    var second4: number = fw.getInt32();
+    return undefined;
+  }
+  function typeFloat(fw: FileWrapper): number{
+    var size: number = fw.getUInt8();
+    if(size === 4){ return fw.getFloat(); }
+    return fw.getDouble()
+  }
+  function typeBinaryFloat(fw: FileWrapper): number{
+    return fw.getDouble();
   }
   //function codeobj(fw: FileWrapper): CodeObject{
   //  can be recursive
   //}
+}
+interface FileWrapper{
+  getInt32: GetNumber;
+  getUInt8: GetNumber;
+  getFloat: GetNumber;
+  getDouble: GetNumber;
+  getUtf8: GetString;
+}
+interface GetNumber{
+  (): number;
+}
+interface GetString{
+  (): string;
+}
+class FileWrapperNode{
+  private buffer: any; //type?
+  private offset: number;
+  private path: string;
+
+  constructor(path: string){
+    this.offset = 0;
+    this.path = path;
+  }
+  connect(cb){
+    var fs = require('fs');
+    fs.readFile(this.path, this.getAfterRead(cb));
+  }
+  getInt32(): number{
+    return this.readNum(this.buffer.readInt32LE, 4);
+  }
+  getUInt8(): number{
+    return this.readNum(this.buffer.readUInt8, 1);
+  }
+  getFloat(): number{
+    return this.readNum(this.buffer.readFloatLE, 4);
+  }
+  getUtf8(): string{
+    var c: string = this.buffer.toSting('utf8', this.offset, this.offset + 1);
+    this.offset++;
+    return c;
+  }
+  private readNum(readFunc: ReadFunc, offsetIncrease: number): number{
+    var n = readFunc.call(this.buffer, this.offset, true);
+    this.offset += offsetIncrease;
+    return n;
+  }
+  private getAfterRead(cb){
+    var fwn: FileWrapperNode = this;
+    return function afterRead(err, buffer){
+      if (err) { throw err;}
+      fwn.buffer = buffer;
+      cb();
+    };
+  }
+}
+interface ReadFunc{
+  (offset: number, noAssert: boolean): number;
 }
 class CodeObject{
   //thanks to http://daeken.com/2010-02-20_Python_Marshal_Format.html
@@ -110,64 +180,6 @@ interface CodeOffsetToLineNoMap{
   [index: number]: number;
 }
 class StackMachine{
-}
-interface FileWrapper{
-  getInt32: GetNumber;
-  getUInt8: GetNumber;
-  //we need to change this when we know 64 bit int representation
-  getInt64: GetNumber;
-  getUtf8: GetString;
-}
-interface GetNumber{
-  (): number;
-}
-interface GetString{
-  (): string;
-}
-class FileWrapperNode{
-  private buffer: any; //type?
-  private offset: number;
-  private path: string;
-
-  constructor(path: string){
-    this.offset = 0;
-    this.path = path;
-  }
-  connect(cb){
-    var fs = require('fs');
-    fs.readFile(this.path, this.getAfterRead(cb));
-  }
-  getInt32(): number{
-    return this.readNum(this.buffer.readInt32LE, 4);
-  }
-  getUInt8(): number{
-    return this.readNum(this.buffer.readUInt8, 1);
-  }
-  getInt64(): any{
-    //This is incorrect. How will we represent 64 bit ints?
-    return this.readNum(this.buffer.readDoubleLE, 8);
-  }
-  getUtf8(): string{
-    var c: string = this.buffer.toSting('utf8', this.offset, this.offset + 1);
-    this.offset++;
-    return c;
-  }
-  private readNum(readFunc: ReadFunc, offsetIncrease: number): number{
-    var n = readFunc.call(this.buffer, this.offset, true);
-    this.offset += offsetIncrease;
-    return n;
-  }
-  private getAfterRead(cb){
-    var fwn: FileWrapperNode = this;
-    return function afterRead(err, buffer){
-      if (err) { throw err;}
-      fwn.buffer = buffer;
-      cb();
-    };
-  }
-}
-interface ReadFunc{
-  (offset: number, noAssert: boolean): number;
 }
 class Tuple<T>{
   private array: T[]; 
