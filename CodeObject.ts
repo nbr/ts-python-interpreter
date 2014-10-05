@@ -1,4 +1,4 @@
-import gLong = require('./gLong');
+import gLong = require('./lib/gLong');
 
 class PycFile{
   //thanks to http://nedbatchelder.com/blog/200804/the_structure_of_pyc_files.html

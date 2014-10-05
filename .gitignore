@@ -33,3 +33,7 @@ node_modules
 # JavaScript
 # Excluding the compiled TypeScript
 *.js
+
+# IDE project files
+*.iml
+.idea/
