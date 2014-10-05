@@ -1,4 +1,6 @@
 /// <reference path="lib/node.d.ts" />
+import gLong = require('./lib/gLong');
+
 class PycFile{
   //thanks to http://nedbatchelder.com/blog/200804/the_structure_of_pyc_files.html
   //Python pyc file fields
@@ -60,18 +62,17 @@ module MarshalParser{
   function typeInt(fw: FileWrapper): number{
     return fw.getInt32();
   }
-  //returning any right now because we haven't
-  //decided how to represent 64 bit ints
-  function typeInt64(fw: FileWrapper): any{
-    //figure out how to represent 64 bit int
-    var first4: number = fw.getInt32();
-    var second4: number = fw.getInt32();
-    return undefined;
+
+  function typeInt64(fw: FileWrapper): gLong {
+      var high: number = fw.getInt32();
+      var low: number = fw.getInt32();
+      return gLong.fromBits(low,high);
   }
+
   function typeFloat(fw: FileWrapper): number{
     var size: number = fw.getUInt8();
     if(size === 4){ return fw.getFloat(); }
-    return fw.getDouble()
+    return fw.getDouble();
   }
   function typeBinaryFloat(fw: FileWrapper): number{
     return fw.getDouble();
@@ -159,11 +160,11 @@ class CodeObject{
   //Implementation variables
   //Looking at CALL_FUNCTION of dis it seems as though
   //each code object should have its own stack machine
-  //since it pops arguments and function and pushes 
+  //since it pops arguments and function and pushes
   //return. That function itself must be executed on
   //stack machine.
   private stackMachine: StackMachine;
-  
+
   //Look into factory pattern?
   constructor(/*dict containing all the fields*/){
     //fill in fields
@@ -184,7 +185,7 @@ interface CodeOffsetToLineNoMap{
 class StackMachine{
 }
 class Tuple<T>{
-  private array: T[]; 
+  private array: T[];
   constructor(array: T[]){
     this.array = array.slice(0);
   }
