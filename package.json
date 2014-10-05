@@ -1,10 +1,10 @@
 {
-  "name": "HelloWorld",
+  "name": "ts-python-interpreter",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "compile": "tsc helloworld.ts",
-    "start": "node helloworld.js"
+    "compile": "tsc CodeObject.ts --module commonjs",
+    "start": "node parser.js"
   },
   "dependencies": {
     "typescript": "1.0.1"

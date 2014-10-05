@@ -1,3 +1,4 @@
+/// <reference path="lib/node.d.ts" />
 class PycFile{
   //thanks to http://nedbatchelder.com/blog/200804/the_structure_of_pyc_files.html
   //Python pyc file fields
@@ -92,6 +93,7 @@ interface GetNumber{
 interface GetString{
   (): string;
 }
+import fs = require('fs');
 class FileWrapperNode{
   private buffer: any; //type?
   private offset: number;
@@ -102,7 +104,7 @@ class FileWrapperNode{
     this.path = path;
   }
   connect(cb){
-    var fs = require('fs');
+    //var fs = require('fs');
     fs.readFile(this.path, this.getAfterRead(cb));
   }
   getInt32(): number{
