@@ -1,0 +1,4 @@
+enum OpCode{
+};
+
+export = OpCode;
