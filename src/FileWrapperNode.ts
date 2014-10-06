@@ -1,9 +1,10 @@
 /// <reference path="../lib/node.d.ts" />
 import fs = require('fs');
+//import buf = require('buffer');
 import FileWrapper = require('./FileWrapper')
 
 class FileWrapperNode implements FileWrapper{
-  private buffer: any; //type?
+  private buffer; //type? tried buf.Buffer and buf.NodeBuffer
   private offset: number;
   private path: string;
 
@@ -12,7 +13,6 @@ class FileWrapperNode implements FileWrapper{
     this.path = path;
   }
   connect(cb){
-    //var fs = require('fs');
     fs.readFile(this.path, this.getAfterRead(cb));
   }
   getInt32(): number{

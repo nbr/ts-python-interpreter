@@ -1,5 +1,7 @@
 import StackOp = require('StackOp');
 import StackMachine = require('StackMachine');
+import Tuple = require('Tuple');
+
 class CodeObject{
   //thanks to http://daeken.com/2010-02-20_Python_Marshal_Format.html
   //Python code object fields
@@ -36,18 +38,6 @@ class CodeObject{
 }
 interface CodeOffsetToLineNoMap{
   [index: number]: number;
-}
-class Tuple<T>{
-  private array: T[];
-  constructor(array: T[]){
-    this.array = array.slice(0);
-  }
-  getItem(index: number): T{
-    return this.array[index];
-  }
-  getLength(): number{
-    return this.array.length;
-  }
 }
 
 export = CodeObject;
