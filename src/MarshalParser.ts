@@ -1,7 +1,10 @@
 import gLong = require('../lib/gLong');
-import FileWrapper = require('FileWrapper');
-import Tuple = require('Tuple');
-import List = require('List');
+import FileWrapper = require('./FileWrapper');
+import Tuple = require('./Tuple');
+import List = require('./List');
+import Dict = require('./Dict');
+import Frozenset = require('./Frozenset');
+import CodeObject = require('./CodeObject');
 
 enum Constants {
   Null,
@@ -103,6 +106,19 @@ function typeList(fw: FileWrapper): List<any>{
   var count: number = fw.getInt32();
   return new List<any>(getNextN(count, fw));
 }
+function typeDict(fw: FileWrapper): Dict{
+  var object = {};
+  var key: any = parse(fw);
+  while(key !== Constants.Null){
+    object[key] = parse(fw);
+    key = parse(fw);
+  }
+  return new Dict(object);
+}
+function typeFrozenset(fw: FileWrapper): Frozenset<any>{
+  var count: number = fw.getInt32();
+  return new Frozenset<any>(getNextN(count, fw));
+}
 function getNextN(n: number, fw: FileWrapper): any[]{
   var a: any[] = new Array();
   for(var i: number = 0; i < n; i++){
@@ -110,6 +126,33 @@ function getNextN(n: number, fw: FileWrapper): any[]{
   }
   return a;
 }
-//function codeobj(fw: FileWrapper): CodeObject{
-//  can be recursive
-//}
+function typeCodeObject(fw: FileWrapper): CodeObject{
+  var argcount: number = fw.getInt32();
+  var nlocals: number = fw.getInt32();
+  var stacksize: number = fw.getInt32();
+  var flags: number = fw.getInt32();
+  var code: string = typeString(fw);
+  var consts: Tuple<string> = typeTuple(fw);
+  var names: Tuple<string> = typeTuple(fw);
+  var varnames: Tuple<string> = typeTuple(fw);
+  var freevars: Tuple<any> = typeTuple(fw);
+  var cellvars: Tuple<any> = typeTuple(fw);
+  var filename: string = typeString(fw);
+  var name: string = typeString(fw);
+  var firstlineno: number = fw.getInt32();
+  var lnotab: string = typeString(fw);
+  return new CodeObject(argcount,
+      nlocals,
+      stacksize,
+      flags,
+      code,
+      consts,
+      names,
+      varnames,
+      freevars,
+      cellvars,
+      filename,
+      name,
+      firstlineno,
+      lnotab)
+}

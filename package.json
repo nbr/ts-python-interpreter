@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "compile": "tsc --out main.js src/main.ts --module commonjs",
+    "compile": "tsc src/main.ts --outDir ./compiled --module commonjs",
     "start": "node parser.js"
   },
   "dependencies": {
