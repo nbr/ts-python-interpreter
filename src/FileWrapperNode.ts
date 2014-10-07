@@ -18,6 +18,9 @@ class FileWrapperNode implements FileWrapper{
   getInt32(): number{
     return this.readNum(this.buffer.readInt32LE, 4);
   }
+  getUInt32(): number{
+    return this.readNum(this.buffer.readUInt32LE, 4);
+  }
   getUInt8(): number{
     return this.readNum(this.buffer.readUInt8, 1);
   }

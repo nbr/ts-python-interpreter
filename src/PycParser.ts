@@ -14,8 +14,5 @@ function parseMagicNumber(fw: FileWrapper): any{
   return magicno;
 }
 function parseModTimeStamp(fw: FileWrapper): Date{
-  //this probably isn't the correct parsing,
-  //but as long as correct number of bytes consumed,
-  //I don't care right now
-  return new Date(fw.getInt32());
+  return new Date(1000*fw.getUInt32());
 }
