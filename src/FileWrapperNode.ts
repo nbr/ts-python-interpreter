@@ -28,7 +28,7 @@ class FileWrapperNode implements FileWrapper{
     return this.readNum(this.buffer.readDoubleLE, 8);
   }
   getUtf8(size: number): string{
-    var s: string = this.buffer.toSting('utf8', this.offset, this.offset + size);
+    var s: string = this.buffer.toString('utf8', this.offset, this.offset + size);
     this.offset += size;
     return s;
   }

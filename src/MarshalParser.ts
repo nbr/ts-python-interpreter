@@ -31,10 +31,15 @@ var typeParserMap = {
   's': typeString,
   't': typeInterned,
   'R': typeStringref,
-  'u': typeUnicode
+  'u': typeUnicode,
+  '(': typeTuple,
+  '[': typeList,
+  '{': typeDict,
+  '>': typeFrozenset,
+  'c': typeCodeObject
 };
 export function parse(fw: FileWrapper): any{
-  return typeParserMap[fw.getUInt8()](fw);
+  return typeParserMap[fw.getUtf8(1)](fw);
 }
 function typeInt(fw: FileWrapper): number{
   return fw.getInt32();

@@ -4,8 +4,9 @@ import CodeObject = require('./CodeObject');
 import PycFile = require('./PycFile');
 import PycParser = require('./PycParser');
 
-var fw: FileWrapper = new FileWrapperNode('/path/to/pyc/file');
+var fw: FileWrapper = new FileWrapperNode('./sample_pycs/sample.pyc.27');
 fw.connect(function afterConnect(){
   var pyc: PycFile = PycParser.parse(fw);
+  console.log(pyc.stringify());
   pyc.interpret();
 });

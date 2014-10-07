@@ -15,6 +15,9 @@ class PycFile{
   interpret(){
     this.codeobj.execute();
   }
+  stringify(): string{
+    return JSON.stringify(this);
+  }
 }
 
 export = PycFile;

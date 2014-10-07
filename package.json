@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "compile": "tsc src/main.ts --outDir ./compiled --module commonjs",
-    "start": "node parser.js"
+    "run": "node ./compiled/src/main.js",
+    "start": "node ./compiled/src/main.js"
   },
   "dependencies": {
     "typescript": "1.0.1"
