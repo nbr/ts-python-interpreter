@@ -5,7 +5,8 @@ import PycFile = require('./PycFile');
 import PycParser = require('./PycParser');
 
 function InterpretPyc(fs: any, path: string, cb: () => void){
-  var fw: FileWrapper = new FileWrapperNode('./sample_pycs/sample.pyc', fs);
+  console.log('path = ' + path);
+  var fw: FileWrapper = new FileWrapperNode(path, fs);
   fw.readFile(function afterReadFile(){
     var pyc: PycFile = PycParser.parse(fw);
     console.log(pyc.stringify());

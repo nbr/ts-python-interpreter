@@ -1,7 +1,8 @@
+/// <reference path="../lib/node.d.ts" />
 import FileWrapper = require('./FileWrapper');
 
 class FileWrapperNode implements FileWrapper{
-  private buffer: any;
+  private buffer: NodeBuffer;
   private offset: number;
   private path: string;
   private fs: any; //could make an interface for fs requiring it to implement readFile(...)
