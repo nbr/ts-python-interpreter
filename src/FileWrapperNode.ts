@@ -1,19 +1,18 @@
-/// <reference path="../lib/node.d.ts" />
-import fs = require('fs');
-//import buf = require('buffer');
-import FileWrapper = require('./FileWrapper')
+import FileWrapper = require('./FileWrapper');
 
 class FileWrapperNode implements FileWrapper{
-  private buffer; //type? tried buf.Buffer and buf.NodeBuffer
+  private buffer: any;
   private offset: number;
   private path: string;
+  private fs: any; //could make an interface for fs requiring it to implement readFile(...)
 
-  constructor(path: string){
+  constructor(path: string, fs: any){
     this.offset = 0;
     this.path = path;
+    this.fs = fs;
   }
-  connect(cb){
-    fs.readFile(this.path, this.getAfterRead(cb));
+  readFile(cb: () => void){
+    this.fs.readFile(this.path, this.getAfterReadFile(cb));
   }
   getInt32(): number{
     return this.readNum(this.buffer.readInt32LE, 4);
@@ -40,10 +39,10 @@ class FileWrapperNode implements FileWrapper{
     this.offset += offsetIncrease;
     return n;
   }
-  private getAfterRead(cb){
+  private getAfterReadFile(cb){
     var fwn: FileWrapperNode = this;
-    return function afterRead(err, buffer){
-      if (err) { throw err;}
+    return function afterReadFile(err, buffer){
+      if (err) { throw err; }
       fwn.buffer = buffer;
       cb();
     };

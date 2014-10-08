@@ -3,11 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "compile": "tsc src/main.ts --outDir ./compiled --module commonjs",
-    "run": "node ./compiled/src/main.js",
+    "compile-node": "./node_modules/typescript/bin/tsc src/main.ts --outDir ./compiled --module commonjs",
+    "compile-amd": "./node_modules/typescript/bin/tsc src/InterpretPyc.ts --outDir ./compiled --module amd",
+    "optimize": "node ./node_modules/requirejs/bin/r.js -o build.js",
     "start": "node ./compiled/src/main.js"
   },
   "dependencies": {
-    "typescript": "1.0.1"
+    "typescript": "1.0.1",
+    "requirejs": "2.1.15"
   }
 }

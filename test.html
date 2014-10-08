@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--<script src="compiled/lib/jquery-2.1.1.min.js" type="text/javascript"></script>-->
+  <script data-main="release/interpret-pyc" src="node_modules/requirejs/require.js"></script>
+  <script src="compiled/lib/browserfs.min.js" type="text/javascript"></script>
+</head>
+<body>
+  <h1>Python Interpreter Test</h1>
+  <div id='out'>
+  </div>
+  <script type="text/javascript">
+    BrowserFS.install(window);
+    var lsfs = new BrowserFS.FileSystem.LocalStorage();
+    BrowserFS.initialize(lsfs);
+    var fs = require('fs');
+  </script>
+</body>
+</html>
