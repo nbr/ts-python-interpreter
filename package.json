@@ -3,11 +3,20 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "compile": "tsc src/main.ts --outDir ./compiled --module commonjs",
+    "compile": "./node_modules/node-tsc/node_modules/typescript/bin/tsc src/main.ts --outDir ./compiled --module commonjs",
     "run": "node ./compiled/src/main.js",
     "start": "node ./compiled/src/main.js"
   },
   "dependencies": {
     "typescript": "1.0.1"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-connect": "^0.8.0",
+    "grunt-contrib-qunit": "^0.5.2",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-open": "^0.2.3",
+    "grunt-typescript": "^0.3.8",
+    "typescript": "^1.0.1"
   }
 }
