@@ -1,0 +1,36 @@
+
+<!-- Acknoowledgement: http://jordankasper.com/blog/2013/04/automated-javascript-tests-using-grunt-phantomjs-and-qunit/ -->
+<!doctype html>
+<html>
+<head>
+    <meta charset='UTF-8' />
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+    <title>Ts-Py Tests</title>
+
+    <link rel='stylesheet' href='lib/qunit-1.15.0.css'>
+
+    <script src='../src/your.project.code.js'></script>
+    <!-- add any JS files under test (or put them in different .html files) -->
+
+    <script src='lib/qunit-1.15.0.js'></script>
+
+    <!-- your tests, any and all to run with the given fixtures below -->
+    <!-- <script src='test.js'></script> -->
+    <script>
+        QUnit.test( "a basic test example", function( assert ) {
+            var value = "hello";
+            assert.equal( value, "hello", "We expect value to be hello" );
+        });
+    </script>
+
+</head>
+<body>
+<div id="qunit"></div> <!-- QUnit fills this with results, etc -->
+<div id='qunit-fixture'>
+
+    <!-- any HTML you want to be present in each test (will be reset for each test) -->
+
+</div>
+</body>
+</html>
