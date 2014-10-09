@@ -4,16 +4,10 @@ import FileWrapper = require('./FileWrapper');
 class FileWrapperNode implements FileWrapper{
   private buffer: NodeBuffer;
   private offset: number;
-  private path: string;
-  private fs: any; //could make an interface for fs requiring it to implement readFile(...)
 
-  constructor(path: string, fs: any){
+  constructor(buffer: NodeBuffer){
+    this.buffer = buffer;
     this.offset = 0;
-    this.path = path;
-    this.fs = fs;
-  }
-  readFile(cb: () => void){
-    this.fs.readFile(this.path, this.getAfterReadFile(cb));
   }
   getInt32(): number{
     return this.readNum(this.buffer.readInt32LE, 4);
@@ -35,18 +29,15 @@ class FileWrapperNode implements FileWrapper{
     this.offset += size;
     return s;
   }
+  getSlice(size: number): FileWrapper{
+    var fw: FileWrapper = new FileWrapperNode(this.buffer.slice(this.offset, this.offset + size));
+    this.offset += size;
+    return fw;
+  }
   private readNum(readFunc: ReadFunc, offsetIncrease: number): number{
     var n = readFunc.call(this.buffer, this.offset, true);
     this.offset += offsetIncrease;
     return n;
-  }
-  private getAfterReadFile(cb){
-    var fwn: FileWrapperNode = this;
-    return function afterReadFile(err, buffer){
-      if (err) { throw err; }
-      fwn.buffer = buffer;
-      cb();
-    };
   }
 }
 interface ReadFunc{

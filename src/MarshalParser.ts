@@ -80,15 +80,15 @@ function typeLong(fw: FileWrapper): gLong{
   //r_PyLong on line 568
   return typeInt64(fw);
 }
-function typeString(fw: FileWrapper): string{
+function typeString(fw: FileWrapper): FileWrapper{
   var size: number = fw.getInt32();
   //is this character set right?
-  return fw.getUtf8(size);
+  return fw.getSlice(size);
 }
 //interned info:
 //https://docs.python.org/3.0/library/sys.html
 //http://stackoverflow.com/questions/15541404/python-string-interning
-function typeInterned(fw: FileWrapper): string{
+function typeInterned(fw: FileWrapper): FileWrapper{
   //do we need to implement an intern list?
   return typeString(fw);
 }
@@ -136,16 +136,16 @@ function typeCodeObject(fw: FileWrapper): CodeObject{
   var nlocals: number = fw.getInt32();
   var stacksize: number = fw.getInt32();
   var flags: number = fw.getInt32();
-  var code: string = typeString(fw);
-  var consts: Tuple<string> = typeTuple(fw);
-  var names: Tuple<string> = typeTuple(fw);
-  var varnames: Tuple<string> = typeTuple(fw);
-  var freevars: Tuple<any> = typeTuple(fw);
-  var cellvars: Tuple<any> = typeTuple(fw);
-  var filename: string = typeString(fw);
-  var name: string = typeString(fw);
+  var code: FileWrapper = parse(fw);
+  var consts: Tuple<any> = parse(fw);
+  var names: Tuple<any> = parse(fw);
+  var varnames: Tuple<any> = parse(fw);
+  var freevars: Tuple<any> = parse(fw);
+  var cellvars: Tuple<any> = parse(fw);
+  var filename: FileWrapper = parse(fw);
+  var name: FileWrapper = parse(fw);
   var firstlineno: number = fw.getInt32();
-  var lnotab: string = typeString(fw);
+  var lnotab: FileWrapper = parse(fw);
   return new CodeObject(argcount,
       nlocals,
       stacksize,

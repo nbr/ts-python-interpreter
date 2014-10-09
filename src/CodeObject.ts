@@ -1,6 +1,6 @@
-import StackOp = require('./StackOp');
 import StackMachine = require('./StackMachine');
 import Tuple = require('./Tuple');
+import FileWrapper = require('./FileWrapper');
 
 class CodeObject{
   //thanks to http://daeken.com/2010-02-20_Python_Marshal_Format.html
@@ -9,18 +9,16 @@ class CodeObject{
   private nlocals: number;
   private stacksize: number;
   private flags: number; //figure out bit operations or maybe switch to enums
-  //private code: StackOp[];
-  private code: string;
+  private code: FileWrapper;
   private consts: Tuple<any>;
-  private names: Tuple<string>; //pretty sure only strings here
-  private varnames: Tuple<string>; //pretty sure only strings here
+  private names: Tuple<any>; //pretty sure only strings here
+  private varnames: Tuple<any>; //pretty sure only strings here
   private freevars: Tuple<any>;
   private cellvars: Tuple<any>;
-  private filename: string;
-  private name: string;
+  private filename: FileWrapper;
+  private name: FileWrapper;
   private firstlineno: number;
-  //private lnotab: CodeOffsetToLineNoMap;
-  private lnotab: string;
+  private lnotab: FileWrapper;
 
   //Implementation variables
   //Looking at CALL_FUNCTION of dis it seems as though
@@ -35,16 +33,16 @@ class CodeObject{
       nlocals: number,
       stacksize: number,
       flags: number,
-      code: string,
-      consts: Tuple<string>,
-      names: Tuple<string>,
-      varnames: Tuple<string>,
+      code: FileWrapper,
+      consts: Tuple<any>,
+      names: Tuple<any>,
+      varnames: Tuple<any>,
       freevars: Tuple<any>,
       cellvars: Tuple<any>,
-      filename: string,
-      name: string,
+      filename: FileWrapper,
+      name: FileWrapper,
       firstlineno: number,
-      lnotab: string){
+      lnotab: FileWrapper){
     this.argcount = argcount;
     this.nlocals = nlocals;
     this.stacksize = stacksize;

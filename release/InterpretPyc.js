@@ -1,13 +1,9 @@
 define('compiled/src/FileWrapperNode',["require", "exports"], function(require, exports) {
     var FileWrapperNode = (function () {
-        function FileWrapperNode(path, fs) {
+        function FileWrapperNode(buffer) {
+            this.buffer = buffer;
             this.offset = 0;
-            this.path = path;
-            this.fs = fs;
         }
-        FileWrapperNode.prototype.readFile = function (cb) {
-            this.fs.readFile(this.path, this.getAfterReadFile(cb));
-        };
         FileWrapperNode.prototype.getInt32 = function () {
             return this.readNum(this.buffer.readInt32LE, 4);
         };
@@ -28,20 +24,15 @@ define('compiled/src/FileWrapperNode',["require", "exports"], function(require, 
             this.offset += size;
             return s;
         };
+        FileWrapperNode.prototype.getSlice = function (size) {
+            var fw = new FileWrapperNode(this.buffer.slice(this.offset, this.offset + size));
+            this.offset += size;
+            return fw;
+        };
         FileWrapperNode.prototype.readNum = function (readFunc, offsetIncrease) {
             var n = readFunc.call(this.buffer, this.offset, true);
             this.offset += offsetIncrease;
             return n;
-        };
-        FileWrapperNode.prototype.getAfterReadFile = function (cb) {
-            var fwn = this;
-            return function afterReadFile(err, buffer) {
-                if (err) {
-                    throw err;
-                }
-                fwn.buffer = buffer;
-                cb();
-            };
         };
         return FileWrapperNode;
     })();
@@ -941,7 +932,7 @@ define('compiled/src/MarshalParser',["require", "exports", '../lib/gLong', './Tu
         var size = fw.getInt32();
 
         //is this character set right?
-        return fw.getUtf8(size);
+        return fw.getSlice(size);
     }
 
     //interned info:
@@ -996,16 +987,16 @@ define('compiled/src/MarshalParser',["require", "exports", '../lib/gLong', './Tu
         var nlocals = fw.getInt32();
         var stacksize = fw.getInt32();
         var flags = fw.getInt32();
-        var code = typeString(fw);
-        var consts = typeTuple(fw);
-        var names = typeTuple(fw);
-        var varnames = typeTuple(fw);
-        var freevars = typeTuple(fw);
-        var cellvars = typeTuple(fw);
-        var filename = typeString(fw);
-        var name = typeString(fw);
+        var code = exports.parse(fw);
+        var consts = exports.parse(fw);
+        var names = exports.parse(fw);
+        var varnames = exports.parse(fw);
+        var freevars = exports.parse(fw);
+        var cellvars = exports.parse(fw);
+        var filename = exports.parse(fw);
+        var name = exports.parse(fw);
         var firstlineno = fw.getInt32();
-        var lnotab = typeString(fw);
+        var lnotab = exports.parse(fw);
         return new CodeObject(argcount, nlocals, stacksize, flags, code, consts, names, varnames, freevars, cellvars, filename, name, firstlineno, lnotab);
     }
 });
@@ -1028,15 +1019,12 @@ define('compiled/src/PycParser',["require", "exports", './PycFile', './MarshalPa
 });
 
 define('compiled/src/InterpretPyc',["require", "exports", './FileWrapperNode', './PycParser'], function(require, exports, FileWrapperNode, PycParser) {
-    function InterpretPyc(fs, path, cb) {
-        console.log('path = ' + path);
-        var fw = new FileWrapperNode(path, fs);
-        fw.readFile(function afterReadFile() {
-            var pyc = PycParser.parse(fw);
-            console.log(pyc.stringify());
-            pyc.interpret();
-            cb();
-        });
+    function InterpretPyc(buffer, cb) {
+        var fw = new FileWrapperNode(buffer);
+        var pyc = PycParser.parse(fw);
+        console.log(pyc.stringify());
+        pyc.interpret();
+        cb();
     }
 
     

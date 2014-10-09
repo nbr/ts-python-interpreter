@@ -5,6 +5,6 @@ interface FileWrapper{
   getFloat(): number;
   getDouble(): number;
   getUtf8(size: number): string;
-  readFile(cb: () => void);
+  getSlice(size: number): FileWrapper;
 }
 export = FileWrapper;
