@@ -1,20 +1,23 @@
 module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-typescript');
-    //grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    //grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-open');
     grunt.loadNpmTasks('grunt-contrib-qunit'); //Note: Requires, bundled with PhantomJS
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        connect: {
+        qunit: {
+            all: ['test/index.html']
+        },
+        /*connect: {
             server: {
                 options: {
                     port: 8080,
                     base: './'
                 }
             }
-        },
+        },*/
         typescript: {
             base: {
                 src: ['src/*.ts'],
@@ -25,20 +28,18 @@ module.exports = function (grunt) {
                 }
             }
         },
-        //watch: {
-        //    files: '**/*.ts',
-        //    tasks: ['typescript']
-        //},
+        watch: {
+            files: 'src/*.ts',
+            tasks: ['typescript','qunit']
+        },
         open: {
             dev: {
-                path: 'http://localhost:8080/index.html'
+                path: 'test/index.html'
             }
         }
     });
-
-    //@nbraga: For now, not using 'watch' but could be useful later
-    //grunt connect:keepalive would run server indefinitely if needed
-    //O/w I am adding QUnit tests and then will close
-    grunt.registerTask('default', ['connect', 'open']);
+    grunt.registerTask('default',['qunit']);
+    grunt.registerTask('watch',['qunit','watch'])
+    grunt.registerTask('show-results', ['qunit','open']);
 
 }
