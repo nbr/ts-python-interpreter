@@ -6,7 +6,8 @@
     "compile-node": "./node_modules/typescript/bin/tsc src/main.ts --outDir ./compiled --module commonjs",
     "compile-amd": "./node_modules/typescript/bin/tsc src/InterpretPyc.ts --outDir ./compiled --module amd",
     "optimize": "node ./node_modules/requirejs/bin/r.js -o build.js",
-    "start": "node ./compiled/src/main.js"
+    "start": "node ./compiled/src/main.js",
+    "debug": "./node_modules/node-inspector/bin/node-debug.js compiled/src/main.js"
   },
   "dependencies": {
     "typescript": "1.0.1",
