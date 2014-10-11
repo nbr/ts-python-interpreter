@@ -1,4 +1,4 @@
-<!-- Acknoowledgement: http://jordankasper.com/blog/2013/04/automated-javascript-tests-using-grunt-phantomjs-and-qunit/ -->
+<!-- Acknowledgement: http://jordankasper.com/blog/2013/04/automated-javascript-tests-using-grunt-phantomjs-and-qunit/ -->
 <!doctype html>
 <html>
 <head>
@@ -8,9 +8,10 @@
     <link rel='stylesheet' href='lib/qunit-1.15.0.css'>
 
     <!-- Compiled JS code (Grunt compiles beforehand); Each script must be run through RequireJS -->
-    <script data-main="'../compiled/src/MarshalParser.js'" src="node_modules/requirejs/require.js"></script>
+    <script data-main="../compiled/src/MarshalParser.js" src="node_modules/requirejs/require.js"></script>
     <script src='lib/qunit-1.15.0.js'></script>
     <!-- Unit tests -->
+    <script data-main="tests.js" src="../node_modules/requirejs/require.js"></script>
     <script src='tests.js'></script>
 </head>
 <body>

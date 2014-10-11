@@ -1,8 +1,26 @@
+var FileWrapperNode = require('../compiled/src/FileWrapperNode');
+var PycParser = require('../compiled/src/MarshalParser');
+
+function getActualOutput(pathToPyc) {
+    var fw = new FileWrapperNode(pathToPyc);
+    var actualOutput;
+    fw.connect(function afterConnect() {
+        var pyc = MarshalParser.parse(fw);
+        actualOutput = pyc.stringify();
+    });
+    return actualOutput;
+}
+
+var testPath = "/path/"
+
 module("MarshalParser");
 
+var mpPath = testPath + "/to/"
+
 test( "typeInt", function( assert ) {
-    var value = "hello";
-    assert.equal( value, "hello", "We expect value to be hello" );
+    var expectedOutput = "";
+    var actualOutput = getActualOutput(mpPath + "testdata.file");
+    assert.equal(value,expectedOutput,actualOutput)
 });
 
 test( "typeInt64", function( assert ) {
@@ -49,6 +67,8 @@ test( "typeStringref", function( assert ) {
     var value = "hello";
     assert.equal( value, "hello", "We expect value to be hello" );
 });
+
+//Super-unit tests
 
 test( "typeUnicode", function( assert ) {
     var value = "hello";
