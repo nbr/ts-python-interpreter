@@ -1,6 +1,7 @@
 import StackMachine = require('./StackMachine');
 import Tuple = require('./Tuple');
 import FileWrapper = require('./FileWrapper');
+import PyObject = require('./PyObject');
 
 class CodeObject{
   //thanks to http://daeken.com/2010-02-20_Python_Marshal_Format.html
@@ -9,16 +10,16 @@ class CodeObject{
   private nlocals: number;
   private stacksize: number;
   private flags: number; //figure out bit operations or maybe switch to enums
-  private code: FileWrapper;
-  private consts: Tuple<any>;
-  private names: Tuple<any>; //pretty sure only strings here
-  private varnames: Tuple<any>; //pretty sure only strings here
-  private freevars: Tuple<any>;
-  private cellvars: Tuple<any>;
-  private filename: FileWrapper;
-  private name: FileWrapper;
+  private code: PyObject;
+  private consts: PyObject;
+  private names: PyObject; //pretty sure only strings here
+  private varnames: PyObject; //pretty sure only strings here
+  private freevars: PyObject;
+  private cellvars: PyObject;
+  private filename: PyObject;
+  private name: PyObject;
   private firstlineno: number;
-  private lnotab: FileWrapper;
+  private lnotab: PyObject;
 
   //Implementation variables
   //Looking at CALL_FUNCTION of dis it seems as though
@@ -33,16 +34,16 @@ class CodeObject{
       nlocals: number,
       stacksize: number,
       flags: number,
-      code: FileWrapper,
-      consts: Tuple<any>,
-      names: Tuple<any>,
-      varnames: Tuple<any>,
-      freevars: Tuple<any>,
-      cellvars: Tuple<any>,
-      filename: FileWrapper,
-      name: FileWrapper,
+      code: PyObject,
+      consts: PyObject,
+      names: PyObject,
+      varnames: PyObject,
+      freevars: PyObject,
+      cellvars: PyObject,
+      filename: PyObject,
+      name: PyObject,
       firstlineno: number,
-      lnotab: FileWrapper){
+      lnotab: PyObject){
     this.argcount = argcount;
     this.nlocals = nlocals;
     this.stacksize = stacksize;
