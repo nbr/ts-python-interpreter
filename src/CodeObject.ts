@@ -27,7 +27,6 @@ class CodeObject{
   //since it pops arguments and function and pushes
   //return. That function itself must be executed on
   //stack machine.
-  private stackMachine: StackMachine;
 
   //Look into factory pattern?
   constructor(argcount: number,
@@ -58,9 +57,15 @@ class CodeObject{
     this.name = name;
     this.firstlineno = firstlineno;
     this.lnotab = lnotab;
-    this.stackMachine = new StackMachine();
   }
   execute(){
+    new StackMachine(this).execute();
+  }
+  getCode(): PyObject{
+    return this.code;
+  }
+  getConst(index: number): PyObject{
+    return this.consts.getValue().getItem(index);
   }
 }
 interface CodeOffsetToLineNoMap{

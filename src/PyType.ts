@@ -20,7 +20,8 @@ enum PyType{
   TYPE_LIST,
   TYPE_DICT,
   TYPE_FROZENSET,
-  TYPE_CODE
+  TYPE_CODE,
+  TYPE_ERROR
 }
 
 export = PyType;
