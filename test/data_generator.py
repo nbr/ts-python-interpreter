@@ -9,29 +9,28 @@ PATH = "data/module_marshal-parser/"
 #inputs
 INT = 3
 INT_64 = 9392468011745350111L
-FLOAT = 0.125
-B_FLOAT = 00111110000000000000000000000000 #0.125
-COMPLEX = complex(3,5)
-#B_COMPLEX = 3
-LONG = type(sys.maxint + 1)
+#FLOAT: uint8
+B_FLOAT = 0.125
+#COMPLEX : uint8 real, uint8 imaginary
+B_COMPLEX = complex(3.0,5.0)
+LONG = sys.maxint + 1 #use max(int) to find first long
 STRING = "racecar"
-#STRING_REF = id(STRING)
+#STRING_REF = id(STRING) #this may not be correct
 UNICODE = STRING.decode(encoding='UTF-8')
 TUPLE = tuple([STRING,INT])
-LIST = [FLOAT,LONG]
-DICT = dict(one=STRING,two=FLOAT,three=TUPLE)
+LIST = [B_FLOAT,LONG]
+DICT = dict(one=STRING,two=B_FLOAT,three=TUPLE)
 FROZEN_SET = frozenset("a")
-#CODE_OBJ = 3
 
-inputs = [INT,INT_64,FLOAT,B_FLOAT,COMPLEX,B_COMPLEX,
-	  LONG,STRING,STRING_REF,UNICODE,TUPLE,
-    	  LIST,DICT,FROZEN_SET,CODE_OJ]
+inputs = {"INT":INT,"INT_64":INT_64,"B_FLOAT":B_FLOAT,"B_COMPLEX":B_COMPLEX,
+	"LONG":LONG,"STRING":STRING,"UNICODE":UNICODE,
+	"TUPLE":TUPLE,"LIST":LIST,"DICT":DICT,"FROZEN_SET":FROZEN_SET}
 
 for i in inputs:
 	fo = open(PATH+i+".pyc","wb")
-	fo.write(marshal.dumps(i))
+	fo.write(marshal.dumps(inputs[i]))
 	fo.close()
 
 #@TODO(Nick): for testing on more realistic pycs
 #py_compile.compile('pyc_for_integration_tests');
-
+#Code object should be tested under integration
