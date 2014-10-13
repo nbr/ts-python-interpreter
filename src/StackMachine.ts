@@ -4,6 +4,7 @@ import PyErrorType = require('./PyErrorType');
 import PyType = require('./PyType');
 import PyObject = require('./PyObject');
 import CodeObject = require('./CodeObject');
+import Dict = require('./Dict');
 
 class StackMachine{
   private static pyNumTypes: PyType[] = [
@@ -129,7 +130,7 @@ class StackMachine{
     undefined,                          //110
     undefined,                          //111
     undefined,                          //112
-    this.MAKE_FUNCTION,                 //113
+    undefined,                          //113
     undefined,                          //114
     undefined,                          //115
     undefined,                          //116
@@ -148,7 +149,7 @@ class StackMachine{
     undefined,                          //129
     undefined,                          //130
     undefined,                          //131
-    undefined,                          //132
+    this.MAKE_FUNCTION,                 //132
     undefined,                          //133
     undefined,                          //134
     undefined,                          //135
@@ -274,6 +275,7 @@ class StackMachine{
   ];
   private stack: Array<PyObject>;
   private codeobj: CodeObject;
+  private globals: Dict;
 
   constructor(codeobj: CodeObject){
     this.codeobj = codeobj;
@@ -421,6 +423,8 @@ class StackMachine{
   }
   //132
   private MAKE_FUNCTION(fw: FileWrapper): void{
+    var paramCnt: number = this.getArg(fw);
+    console.log(paramCnt);
   }
   private getArg(fw: FileWrapper): number{
     return fw.getUInt16();
