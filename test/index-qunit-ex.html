@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>QUnit Test Suite</title>
+    <link rel="stylesheet" href="lib/qunit-1.15.0.css">
+    <script data-main="../compiled-test/test/tests.js" type="text/javascript" src="../node_modules/requirejs/require.js"></script>
+    <script src="lib/qunit-1.15.0.js"></script>
+    <script type="text/javascript">
+        window.addEventListener("load", function onLoad() {
+            QUnit.config.autostart = false;
+            // Without this setTimeout, the specs don't always get execute in webKit browsers
+
+            setTimeout(function () {
+                //load tests using require
+                require(['../compiled-test/test/tests.js'], function (one) {
+                    //now trigger them.
+                    QUnit.start();
+                });
+
+            }, 10);
+            window.removeEventListener("load", onLoad, true);
+        }, true);
+    </script>
+</head>
+<body>
+<div id="qunit">
+</div>
+</body>
+</html>
