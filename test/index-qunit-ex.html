@@ -4,7 +4,12 @@
     <meta charset="utf-8">
     <title>QUnit Test Suite</title>
     <link rel="stylesheet" href="lib/qunit-1.15.0.css">
+    <!--
     <script data-main="../compiled-test/test/tests.js" type="text/javascript" src="../node_modules/requirejs/require.js"></script>
+    -->
+    <script data-main="../test/release/tests.js" type="text/javascript" src="../node_modules/requirejs/require.js"></script>
+    <!--
+    -->
     <script src="lib/qunit-1.15.0.js"></script>
     <script type="text/javascript">
         window.addEventListener("load", function onLoad() {
@@ -13,9 +18,10 @@
 
             setTimeout(function () {
                 //load tests using require
-                require(['../compiled-test/test/tests.js'], function (one) {
+                //require(['../compiled-test/test/tests.js'], function (one) {
+                require(['compiled-test/test/tests'], function (one) {
                     //now trigger them.
-                    QUnit.start();
+                    //QUnit.start();
                 });
 
             }, 10);
