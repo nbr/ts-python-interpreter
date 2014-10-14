@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "compile-node": "./node_modules/typescript/bin/tsc src/main.ts --outDir ./compiled --module commonjs",
-    "compile-test": "./node_modules/typescript/bin/tsc test/tests.ts --outDir ./compiled-test/ --module commonjs",
+    "compile-test": "./node_modules/typescript/bin/tsc test/asserts.ts --outDir ./compiled-test/ --module commonjs",
     "compile-test2": "./node_modules/typescript/bin/tsc test/tests.ts --outDir ./compiled-test/ --module amd",
     "optimize-test": "node ./node_modules/requirejs/bin/r.js -o build-test.js",
     "compile-amd": "./node_modules/typescript/bin/tsc src/InterpretPyc.ts --outDir ./compiled --module amd",
