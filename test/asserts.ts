@@ -13,15 +13,14 @@ import MarshalParser = require('../src/MarshalParser');
 import PyObject = require('../src/PyObject');
 import FileWrapper = require('../src/FileWrapper');
 
-function getActualOutput(pathToPyc: string): any{
-    var actualOutput = "";
+function getActualOutput(pathToPyc: string, callback){
     fs.readFile(pathToPyc, function afterRead(err, buffer: NodeBuffer){
         if(err) { throw err; }
         var fw: FileWrapper = new FileWrapperNode(buffer);
         var codeobj: PyObject = MarshalParser.parse(fw);
         actualOutput = codeobj.getValue();
+        callback(actualOutput);
     });
-    return actualOutput;
 }
 
 //http://buildingonmud.blogspot.com/2009/06/
@@ -55,53 +54,67 @@ d.putItem("tu",expectedOutputs["TUPLE"]);
 expectedOutputs["DICT"] = d;
 expectedOutputs["FROZEN_SET"] = new Frozenset(["a"]);
 
-var testPath = "data/";
+var testPath = 'test/data/';
 
-var mpPath = testPath + "marshal-parser/";
+var mpPath = testPath + 'marshal-parser/';
 
-var expectedOutput = "";
-var actualOutput = "";
+var actualOutput;
+getActualOutput(mpPath + 'INT.pyc', function executeAssert(actualOutput){
+    var expectedOutputInt = expectedOutputs["INT"];
+    assert.equal(expectedOutputInt,actualOutput,"Testing type int");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["INT"];
-actualOutput = getActualOutput(mpPath + "INT.pyc");
-console.log("act:");
-console.log(actualOutput);
-console.log("exp:");
-console.log(expectedOutput);
-assert.equal(expectedOutput,actualOutput,"Testing type int");
+getActualOutput(mpPath + 'INT_64.pyc', function executeAssert(actualOutput){
+    var expectedOutputInt64 = expectedOutputs["INT_64"];
+    assert.equal(expectedOutputInt64,actualOutput,"Testing type int64");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["INT_64"];
-actualOutput = getActualOutput(mpPath + "INT_64.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type int64");
+getActualOutput(mpPath + 'B_FLOAT.pyc', function executeAssert(actualOutput){
+    var expectedOutputBFl = expectedOutputs["B_FLOAT"];
+    assert.equal(expectedOutputBFl,actualOutput,"Testing type bfloat");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["B_FLOAT"];
-actualOutput = getActualOutput(mpPath + "B_FLOAT.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type bfloat");
+getActualOutput(mpPath + 'LONG.pyc', function executeAssert(actualOutput){
+    var expectedOutputLong = expectedOutputs["LONG"];
+    assert.equal(expectedOutputLong,actualOutput,"Testing type long");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["LONG"];
-actualOutput = getActualOutput(mpPath + "LONG.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type long");
+getActualOutput(mpPath + 'STRING.pyc', function executeAssert(actualOutput){
+    var expectedOutputStr = expectedOutputs["STRING"];
+    assert.equal(expectedOutputStr,actualOutput,"Testing type str");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["STRING"];
-actualOutput = getActualOutput(mpPath + "STRING.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type str");
+getActualOutput(mpPath + 'UNICODE.pyc', function executeAssert(actualOutput){
+    var expectedOutputUnic = expectedOutputs["UNICODE"];
+    assert.equal(expectedOutputUnic,actualOutput,"Testing type unic");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["UNICODE"];
-actualOutput = getActualOutput(mpPath + "UNICODE.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type unic");
+getActualOutput(mpPath + 'TUPLE.pyc', function executeAssert(actualOutput){
+    var expectedOutputTuple = expectedOutputs["TUPLE"];
+    assert.equal(expectedOutputTuple,actualOutput,"Testing type tuple");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["TUPLE"];
-actualOutput = getActualOutput(mpPath + "TUPLE.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type tuple");
+getActualOutput(mpPath + 'LIST.pyc', function executeAssert(actualOutput){
+    var expectedOutputList = expectedOutputs["LIST"];
+    assert.equal(expectedOutputList,actualOutput,"Testing type list");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["LIST"];
-actualOutput = getActualOutput(mpPath + "LIST.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type list");
+getActualOutput(mpPath + 'DICT.pyc', function executeAssert(actualOutput){
+    var expectedOutputDict = expectedOutputs["DICT"];
+    assert.equal(expectedOutputDict,actualOutput,"Testing type dict");
+});
+actualOutput = "";
 
-expectedOutput = expectedOutputs["DICT"];
-actualOutput = getActualOutput(mpPath + "DICT.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type dict");
-
-expectedOutput = expectedOutputs["FROZEN_SET"];
-actualOutput = getActualOutput(mpPath + "FROZEN_SET.pyc");
-assert.equal(expectedOutput,actualOutput,"Testing type fset");
+getActualOutput(mpPath + 'FROZEN_SET.pyc', function executeAssert(actualOutput){
+    var expectedOutputFrzSet = expectedOutputs["FROZEN_SET"];
+    assert.equal(expectedOutputFrzSet,actualOutput,"Testing type frzset");
+});
+actualOutput = "";
