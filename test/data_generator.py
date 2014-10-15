@@ -5,15 +5,15 @@ import marshal, struct,sys #, py_compile
 # data/[module]/[function_under_test]
 # ex: data/marshal-parser/typeInt.pyc
 
-PATH = "data/module_marshal-parser/"
+PATH = "data/marshal-parser/"
 #inputs
 INT = 3
-INT_64 = 9392468011745350111L
+INT_64 = sys.maxint #9392468011745350111L
 #FLOAT: uint8
 B_FLOAT = 0.125
 #COMPLEX : uint8 real, uint8 imaginary
 B_COMPLEX = complex(3.0,5.0)
-LONG = sys.maxint + 1 #use max(int) to find first long
+LONG = 9392468011745350111L #sys.maxint + 1 #use max(int) to find first long
 STRING = "racecar"
 #STRING_REF = id(STRING) #this may not be correct
 UNICODE = STRING.decode(encoding='UTF-8')
