@@ -1,4 +1,6 @@
-enum PyType{
+//marked for removal
+
+export enum PyType{
   TYPE_NULL,
   TYPE_NONE,
   TYPE_FALSE,

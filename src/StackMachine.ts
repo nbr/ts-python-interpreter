@@ -25,9 +25,9 @@ class StackMachine {
      Array size 255 = 0xff per # of opcodes
      Will fail assertion for unimplemented opcodes
         (10/15: commenting since opcodes are incomplete)
-     _Credit to @jvilk for derived tip from Doppio src/opcodes.ts_
+     _Credit to @jvilk for suggesting this refactoring and referencing similar function from Doppio src/opcodes.ts_
      */
-    enumToArray():Array {
+    enumToArray(): Array{
         var lookupTable = new Array(255);
         for (var i = 0; i < 255; i++) {
             if (enums.OpList.hasOwnProperty("" + i)) {
