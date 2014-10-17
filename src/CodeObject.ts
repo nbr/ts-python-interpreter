@@ -1,4 +1,4 @@
-import StackMachine = require('./StackMachine');
+import PyEval = require('./PyEval');
 import Tuple = require('./Tuple');
 import FileWrapper = require('./FileWrapper');
 import PyObject = require('./PyObject');
@@ -59,7 +59,7 @@ class CodeObject{
     this.lnotab = lnotab;
   }
   execute(){
-    new StackMachine(this).execute();
+    new PyEval(this).execute();
   }
   getCode(): PyObject{
     return this.code;

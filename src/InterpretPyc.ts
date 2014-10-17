@@ -5,6 +5,8 @@ import CodeObject = require('./CodeObject');
 import PycFile = require('./PycFile');
 import PycParser = require('./PycParser');
 
+
+//Main?
 function InterpretPyc(buffer: NodeBuffer, cb: () => void){
   var fw: FileWrapper = new FileWrapperNode(buffer);
   var pyc: PycFile = PycParser.parse(fw);

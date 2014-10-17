@@ -14,6 +14,7 @@ class PycFile{
     this.codeobj = codeobj;
   }
   interpret(){
+    //TODO: is this PyEval execute?
     this.codeobj.getValue().execute();
   }
   stringify(): string{

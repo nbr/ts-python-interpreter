@@ -5,63 +5,88 @@ import PyObject = require('./PyObject');
 import CodeObject = require('./CodeObject');
 import Dict = require('./Dict');
 import enums = require('./enums');
+import PyFrame = require('./PyFrame');
+import Exception = require('./Exceptions');
 
-class StackMachine {
+class PyEval {
 
-    private stack:Array<PyObject>;
-    private codeobj:CodeObject;
-    private globals:Dict;
-    //private lookupTable: Array;
+    current_stack_frame: PyFrame = new PyFrame; //TODO: PyFr constructor
+    private stack: Array<PyObject>; //TODO: still needed?
+    private codeobj: CodeObject;
 
     constructor(codeobj:CodeObject) {
         this.codeobj = codeobj;
         this.stack = new Array<PyObject>();
-        //this.lookupTable = this.enumToArray();
     }
-
-    /*
-     function enum-to-array
-     put result into global lookup table
-     Array size 255 = 0xff per # of opcodes
-     Will fail assertion for unimplemented opcodes
-        (10/15: commenting since opcodes are incomplete)
-     _Credit to @jvilk for suggesting this refactoring and referencing similar function from Doppio src/opcodes.ts_
-     */
-    /*
-    enumToArray(): Array{
-        var lookupTable = new Array(255);
-        for (var i = 0; i < 255; i++) {
-            if (enums.OpList.hasOwnProperty("" + i)) {
-                lookupTable[i] = enums.OpList[i].toLowerCase();
-                //assert(lookupTable[i] != null, "Missing implementation of opcode " + enums.OpList[i]);
-            }
-        }
-        return lookupTable;
-    }
-    */
 
     execute():void {
         var code:FileWrapper = this.codeobj.getCode().getValue();
         code.seek(0);
         while (code.getOffset() < code.getBufLength()) {
-            this.runop(code);
+            this.runOp(code);
         }
     }
 
-    private runop(fw:FileWrapper):void {
-        var opcode:number = fw.getUInt8();
+    //TODO: will fail on unimpl opcodes
+    private runOp(fw: FileWrapper):void {
+        var opcode: number = fw.getUInt8();
         console.log(opcode);
-        //this.lookupTable[opcode].call(this, fw);
-        this[enums.OpList[fw.getUInt8()]].call(this,fw);
+        //assert(lookupTable[i] != null, "Missing implementation of opcode " + enums.OpList[i]);
+        this[enums.OpList[fw.getUInt8()]].call(this, fw);
     }
 
+    private rot(n:number):void {
+        var len:number = this.stack.length;
+        var top:any = this.stack[len - 1];
+        for (var i:number = 1; i < n; i++) {
+            this.stack[len - i] = this.stack[len - i - 1];
+        }
+        this.stack[len - n] = top;
+    }
+
+    private isPyNum(type: enums.PyType):boolean {
+        return (enums.PyType.TYPE_INT <= type && type <= enums.PyType.TYPE_LONG);
+    }
+
+    /*Opcodes
+    ~= ceval.c ln 1112-2824
+    runOp() instead of switch statements*/
+
+
+    //TODO:#?, type of param?, Exception
+    //Credit to Python Innards for Python syntax version.
+    private LOAD_NAME(name: any) {
+        try{
+            return this.current_stack_frame.locals;
+        }
+        catch(e){
+            try{
+                return this.current_stack_frame.globals[name];
+            }
+            catch(e){
+                try{
+                    return this.current_stack_frame.builtins[name];
+                }
+                catch(e){
+                   console.log("" + name + "IS NOT DEFINED");
+                   //throw new Exception("" + name + "not defined");
+                }
+            }
+        }
+    }
+    private STORE_NAME(name: any,value: any){
+        this.current_stack_frame.locals[name] = value;
+    }
+
+    //??
+
     //0
-    private STOP_CODE(fw:FileWrapper):void {
+    private STOP_CODE(fw: FileWrapper):void {
         return;
     }
 
     //1
-    private POP_TOP(fw:FileWrapper):void {
+    private POP_TOP(fw: FileWrapper):void {
         this.stack.pop();
     }
 
@@ -203,18 +228,5 @@ class StackMachine {
     private getArg(fw:FileWrapper):number {
         return fw.getUInt16();
     }
-
-    private rot(n:number):void {
-        var len:number = this.stack.length;
-        var top:any = this.stack[len - 1];
-        for (var i:number = 1; i < n; i++) {
-            this.stack[len - i] = this.stack[len - i - 1];
-        }
-        this.stack[len - n] = top;
-    }
-
-    private isPyNum(type: enums.PyType):boolean {
-      return (enums.PyType.TYPE_INT <= type && type <= enums.PyType.TYPE_LONG);
-    }
 }
-export = StackMachine;
+export = PyEval;
