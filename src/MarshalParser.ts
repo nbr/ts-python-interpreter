@@ -5,16 +5,16 @@ import List = require('./List');
 import Dict = require('./Dict');
 import Frozenset = require('./Frozenset');
 import CodeObject = require('./CodeObject');
-import PyType = require('./PyType');
 import PyObject = require('./PyObject');
+import enums = require('./enums');
 
 var typeParserMap = {
-  'O': function typeNull(fw: FileWrapper){ return new PyObject(PyType.TYPE_NULL, undefined); },
-  'N': function typeNone(fw: FileWrapper){ return new PyObject(PyType.TYPE_NONE, undefined); },
-  'F': function typeFalse(fw: FileWrapper){ return new PyObject(PyType.TYPE_FALSE, undefined); },
-  'T': function typeTrue(fw: FileWrapper){ return new PyObject(PyType.TYPE_TRUE, undefined); },
-  'S': function typeStopiter(fw: FileWrapper){ return new PyObject(PyType.TYPE_STOPITER, undefined); },
-  '.': function typeEllipsis(fw: FileWrapper){ return new PyObject(PyType.TYPE_ELLIPSIS, undefined); },
+  'O': function typeNull(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_NULL, undefined); },
+  'N': function typeNone(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_NONE, undefined); },
+  'F': function typeFalse(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_FALSE, undefined); },
+  'T': function typeTrue(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_TRUE, undefined); },
+  'S': function typeStopiter(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_STOPITER, undefined); },
+  '.': function typeEllipsis(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_ELLIPSIS, undefined); },
   'i': typeInt,
   'I': typeInt64,
   'f': typeFloat,
@@ -36,23 +36,23 @@ export function parse(fw: FileWrapper): PyObject{
   return typeParserMap[fw.getUtf8(1)](fw);
 }
 function typeInt(fw: FileWrapper): PyObject{
-  return new PyObject(PyType.TYPE_INT, fw.getInt32());
+  return new PyObject(enums.PyType.TYPE_INT, fw.getInt32());
 }
 function typeInt64(fw: FileWrapper): PyObject{
   //is this reading order of low/high correct
   //with respect to little endian?
   var high: number = fw.getInt32();
   var low: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_INT64, gLong.fromBits(low,high));
+  return new PyObject(enums.PyType.TYPE_INT64, gLong.fromBits(low,high));
 }
 function typeFloat(fw: FileWrapper): PyObject{
   var size: number = fw.getUInt8();
   //not sure if the character encoding here is UTF-8
   var s: string = fw.getUtf8(size);
-  return new PyObject(PyType.TYPE_FLOAT, Number(s));
+  return new PyObject(enums.PyType.TYPE_FLOAT, Number(s));
 }
 function typeBinaryFloat(fw: FileWrapper): PyObject{
-  return new PyObject(PyType.TYPE_BINARY_FLOAT, fw.getDouble());
+  return new PyObject(enums.PyType.TYPE_BINARY_FLOAT, fw.getDouble());
 }
 function typeComplex(fw: FileWrapper): PyObject{
   //we still need to find a library to represent complex #
@@ -72,11 +72,11 @@ function typeLong(fw: FileWrapper): PyObject{
   //this may not be correct. The blog post is
   //unclear. marshal.c parses TYPE_LONG with
   //r_PyLong on line 568
-  return new PyObject(PyType.TYPE_LONG, typeInt64(fw));
+  return new PyObject(enums.PyType.TYPE_LONG, typeInt64(fw));
 }
 function typeString(fw: FileWrapper): PyObject{
   var size: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_STRING, fw.getSlice(size));
+  return new PyObject(enums.PyType.TYPE_STRING, fw.getSlice(size));
 }
 //interned info:
 //https://docs.python.org/3.0/library/sys.html
@@ -84,39 +84,39 @@ function typeString(fw: FileWrapper): PyObject{
 function typeInterned(fw: FileWrapper): PyObject{
   //do we need to implement an intern list?
   var size: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_INTERNED, fw.getSlice(size));
+  return new PyObject(enums.PyType.TYPE_INTERNED, fw.getSlice(size));
 }
 //should this return a string that is a result of
 //the intern list lookup or just the number that
 //is the reference to the string in the interned
 //list?
 function typeStringref(fw: FileWrapper): PyObject{
-  return new PyObject(PyType.TYPE_STRINGREF, fw.getInt32());
+  return new PyObject(enums.PyType.TYPE_STRINGREF, fw.getInt32());
 }
 function typeUnicode(fw: FileWrapper): PyObject{
   var size: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_UNICODE, fw.getUtf8(size));
+  return new PyObject(enums.PyType.TYPE_UNICODE, fw.getUtf8(size));
 }
 function typeTuple(fw: FileWrapper): PyObject{
   var count: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_TUPLE, new Tuple<any>(getNextN(count, fw)));
+  return new PyObject(enums.PyType.TYPE_TUPLE, new Tuple<any>(getNextN(count, fw)));
 }
 function typeList(fw: FileWrapper): PyObject{
   var count: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_LIST, new List<any>(getNextN(count, fw)));
+  return new PyObject(enums.PyType.TYPE_LIST, new List<any>(getNextN(count, fw)));
 }
 function typeDict(fw: FileWrapper): PyObject{
   var object = {};
   var key: PyObject = parse(fw);
-  while(key.getType() !== PyType.TYPE_NULL){
+  while(key.getType() !== enums.PyType.TYPE_NULL){
     object[key.getValue()] = parse(fw);
     key = parse(fw);
   }
-  return new PyObject(PyType.TYPE_DICT, new Dict(object));
+  return new PyObject(enums.PyType.TYPE_DICT, new Dict(object));
 }
 function typeFrozenset(fw: FileWrapper): PyObject{
   var count: number = fw.getInt32();
-  return new PyObject(PyType.TYPE_FROZENSET, new Frozenset<any>(getNextN(count, fw)));
+  return new PyObject(enums.PyType.TYPE_FROZENSET, new Frozenset<any>(getNextN(count, fw)));
 }
 function getNextN(n: number, fw: FileWrapper): PyObject[]{
   var a: any[] = new Array();
@@ -140,7 +140,7 @@ function typeCodeObject(fw: FileWrapper): PyObject{
   var name: PyObject= parse(fw);
   var firstlineno: number = fw.getInt32();
   var lnotab: PyObject= parse(fw);
-  return new PyObject(PyType.TYPE_CODE, new CodeObject(argcount,
+  return new PyObject(enums.PyType.TYPE_CODE, new CodeObject(argcount,
       nlocals,
       stacksize,
       flags,

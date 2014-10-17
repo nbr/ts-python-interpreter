@@ -1,13 +1,13 @@
-import PyType = require('./PyType');
+import enums = require('./enums');
 
 class PyObject{
-  private type: PyType;
+  private type: enums.PyType;
   private value: any;
-  constructor(type: PyType, value: any){
+  constructor(type: enums.PyType, value: any){
     this.type = type;
     this.value = value;
   }
-  getType(): PyType{
+  getType(): enums.PyType{
     return this.type;
   }
   getValue(): any{

@@ -11,12 +11,12 @@ class StackMachine {
     private stack:Array<PyObject>;
     private codeobj:CodeObject;
     private globals:Dict;
-    private lookupTable: Array;
+    //private lookupTable: Array;
 
     constructor(codeobj:CodeObject) {
         this.codeobj = codeobj;
         this.stack = new Array<PyObject>();
-        this.lookupTable = this.enumToArray();
+        //this.lookupTable = this.enumToArray();
     }
 
     /*
@@ -27,6 +27,7 @@ class StackMachine {
         (10/15: commenting since opcodes are incomplete)
      _Credit to @jvilk for suggesting this refactoring and referencing similar function from Doppio src/opcodes.ts_
      */
+    /*
     enumToArray(): Array{
         var lookupTable = new Array(255);
         for (var i = 0; i < 255; i++) {
@@ -37,6 +38,7 @@ class StackMachine {
         }
         return lookupTable;
     }
+    */
 
     execute():void {
         var code:FileWrapper = this.codeobj.getCode().getValue();
@@ -49,7 +51,8 @@ class StackMachine {
     private runop(fw:FileWrapper):void {
         var opcode:number = fw.getUInt8();
         console.log(opcode);
-        this.lookupTable[opcode].call(this, fw);
+        //this.lookupTable[opcode].call(this, fw);
+        this[enums.OpList[fw.getUInt8()]].call(this,fw);
     }
 
     //0
@@ -91,7 +94,7 @@ class StackMachine {
     private UNARY_POSITIVE(fw:FileWrapper):void {
         var v:PyObject = this.stack.pop();
         if (!this.isPyNum(v.getType())) {
-            v = new PyObject(PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
+            v = new PyObject(enums.PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
         }
         this.stack.push(v);
     }
@@ -100,7 +103,7 @@ class StackMachine {
     private UNARY_NEGATIVE(fw:FileWrapper):void {
         var v:PyObject = this.stack.pop();
         if (!this.isPyNum(v.getType())) {
-            v = new PyObject(PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
+            v = new PyObject(enums.PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
         }
         else {
             v = new PyObject(v.getType(), -1 * v.getValue());
@@ -113,63 +116,63 @@ class StackMachine {
         var v:PyObject = this.stack.pop();
         var b:boolean;
         switch (v.getType()) {
-            case PyType.TYPE_NULL:
+            case enums.PyType.TYPE_NULL:
                 throw 'TYPE_NULL on UNARY_NOT';
                 return;
-            case PyType.TYPE_NONE:
-            case PyType.TYPE_FALSE:
+            case enums.PyType.TYPE_NONE:
+            case enums.PyType.TYPE_FALSE:
                 b = true;
                 break;
-            case PyType.TYPE_TRUE:
+            case enums.PyType.TYPE_TRUE:
                 b = false;
                 break;
-            case PyType.TYPE_STOPITER:
+            case enums.PyType.TYPE_STOPITER:
                 throw 'TYPE_STOPITER on UNARY_NOT';
-            case PyType.TYPE_ELLIPSIS:
+            case enums.PyType.TYPE_ELLIPSIS:
                 throw 'TYPE_ELLIPSIS on UNARY_NOT';
-            case PyType.TYPE_INT:
-            case PyType.TYPE_INT64:
-            case PyType.TYPE_FLOAT:
-            case PyType.TYPE_BINARY_FLOAT:
-            case PyType.TYPE_COMPLEX:
-            case PyType.TYPE_BINARY_COMPLEX:
-            case PyType.TYPE_LONG:
+            case enums.PyType.TYPE_INT:
+            case enums.PyType.TYPE_INT64:
+            case enums.PyType.TYPE_FLOAT:
+            case enums.PyType.TYPE_BINARY_FLOAT:
+            case enums.PyType.TYPE_COMPLEX:
+            case enums.PyType.TYPE_BINARY_COMPLEX:
+            case enums.PyType.TYPE_LONG:
                 if (v.getValue() === 0) {
                     b = true;
                     break;
                 }
                 b = false;
                 break;
-            case PyType.TYPE_STRING:
-            case PyType.TYPE_INTERNED:
+            case enums.PyType.TYPE_STRING:
+            case enums.PyType.TYPE_INTERNED:
                 if (v.getValue().getBufLength() === 0) {
                     b = true;
                     break;
                 }
                 b = false;
                 break;
-            case PyType.TYPE_STRINGREF:
+            case enums.PyType.TYPE_STRINGREF:
                 //need to dereference string
                 throw 'TYPE_STRINGREF on UNARY_NOT';
-            case PyType.TYPE_UNICODE:
+            case enums.PyType.TYPE_UNICODE:
                 if (v.getValue().length === 0) {
                     b = true;
                     break;
                 }
                 b = false;
                 break;
-            case PyType.TYPE_TUPLE:
-            case PyType.TYPE_LIST:
-            case PyType.TYPE_DICT:
-            case PyType.TYPE_FROZENSET:
+            case enums.PyType.TYPE_TUPLE:
+            case enums.PyType.TYPE_LIST:
+            case enums.PyType.TYPE_DICT:
+            case enums.PyType.TYPE_FROZENSET:
                 if (v.getValue().getLength() === 0) {
                     b = true;
                     break;
                 }
                 b = false;
                 break;
-            case PyType.TYPE_CODE:
-            case PyType.TYPE_ERROR:
+            case enums.PyType.TYPE_CODE:
+            case enums.PyType.TYPE_ERROR:
                 //https://docs.python.org/2/library/stdtypes.html#typesnumeric
                 //this probably is not be correct
                 b = false;
@@ -177,10 +180,10 @@ class StackMachine {
         }
         var p:PyObject;
         if (b) {
-            p = new PyObject(PyType.TYPE_TRUE, undefined);
+            p = new PyObject(enums.PyType.TYPE_TRUE, undefined);
         }
         else {
-            p = new PyObject(PyType.TYPE_FALSE, undefined);
+            p = new PyObject(enums.PyType.TYPE_FALSE, undefined);
         }
         this.stack.push(p);
     }
@@ -210,10 +213,8 @@ class StackMachine {
         this.stack[len - n] = top;
     }
 
-    private isPyNum(type:PyType):boolean {
-        return enums.PyType.some(function (item) {
-            return (type === item);
-        });
+    private isPyNum(type: enums.PyType):boolean {
+      return (enums.PyType.TYPE_INT <= type && type <= enums.PyType.TYPE_LONG);
     }
 }
 export = StackMachine;
