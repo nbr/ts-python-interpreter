@@ -10,11 +10,11 @@ import Exceptions = require('./Exceptions');
 
 class PyEval {
 
-    private current_stack_frame: PyFrame = new PyFrame;
-    private callStack: Array<PyObject>;
+    private current_stack_frame:PyFrame = new PyFrame;
+    private callStack:Array<PyObject>;
     //private codeobj: CodeObject;
 
-    constructor(current_stack_frame: PyFrame) {
+    constructor(current_stack_frame:PyFrame) {
         //     (codeobj: CodeObject         )
         //this.codeobj = codeobj;
         this.current_stack_frame = current_stack_frame;
@@ -31,8 +31,8 @@ class PyEval {
     }
 
     //TODO: will fail on unimpl opcodes
-    private runOp(fw: FileWrapper):void {
-        var opcode: number = fw.getUInt8();
+    private runOp(fw:FileWrapper):void {
+        var opcode:number = fw.getUInt8();
         console.log(opcode);
         //assert(lookupTable[i] != null, "Missing implementation of opcode " + enums.OpList[i]);
         this[enums.OpList[fw.getUInt8()]].call(this, fw);
@@ -47,55 +47,62 @@ class PyEval {
         this.callStack[len - n] = top;
     }
 
-    private isPyNum(type: enums.PyType):boolean {
+    private isPyNum(type:enums.PyType):boolean {
         return (enums.PyType.TYPE_INT <= type && type <= enums.PyType.TYPE_LONG);
     }
 
     /*Opcodes
-    ~= ceval.c ln 1112-2824
-    runOp() instead of switch statements*/
-
+     ~= ceval.c ln 1112-2824
+     runOp() instead of switch statements*/
 
     //TODO:type of param?
     //101
     //Credit to Python Innards for Python-syntax version.
-    private LOAD_NAME(name: any) {
-        var NameError: Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
-        try{
-            return this.current_stack_frame.locals;
+    private LOAD_NAME(name:any):void {
+        var NameError:Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
+        try {
+            this.current_stack_frame.valueStack.push(this.current_stack_frame.locals[name]);
         }
-        catch(NameError){
-            try{
-                return this.current_stack_frame.globals[name];
+        catch (NameError) {
+            try {
+                this.current_stack_frame.valueStack.push(this.current_stack_frame.globals[name]);
             }
-            catch(NameError){
-                try{
-                    return this.current_stack_frame.builtins[name];
+            catch (NameError) {
+                try {
+                    this.current_stack_frame.valueStack.push(this.current_stack_frame.builtins[name]);
                 }
-                catch(NameError){
-                   throw NameError;
+                catch (NameError) {
+                    throw NameError;
                 }
             }
         }
     }
+
     //90
-    private STORE_NAME(name: any,value: any){
+    private STORE_NAME(name:any, value:any) {
         this.current_stack_frame.locals[name] = value;
     }
 
     //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
-    private LOAD_FAST(){}
-    private STORE_FAST(){}
-    private LOAD_GLOBAL(){}
-    private STORE_GLOBAL(){}
+    private LOAD_FAST() {
+    }
+
+    private STORE_FAST() {
+    }
+
+    private LOAD_GLOBAL() {
+    }
+
+    private STORE_GLOBAL() {
+    }
 
     //0
-    private STOP_CODE(fw: FileWrapper):void {
+    private STOP_CODE(fw:FileWrapper):void {
         return;
     }
 
     //1
-    private POP_TOP(fw: FileWrapper):void {
+    private POP_TOP(fw:FileWrapper):void {
         this.callStack.pop();
     }
 

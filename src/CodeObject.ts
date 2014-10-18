@@ -58,9 +58,11 @@ class CodeObject{
     this.firstlineno = firstlineno;
     this.lnotab = lnotab;
   }
-  execute(){
+
+//This is currently never used
+/*  execute(){
     new PyEval(this).execute();
-  }
+  }*/
   getCode(): PyObject{
     return this.code;
   }

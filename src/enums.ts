@@ -43,6 +43,8 @@ export enum OpList {
     UNARY_POSITIVE = 10,
     UNARY_NEGATIVE = 11,
     UNARY_NOT = 12,
+    STORE_NAME = 90,
     LOAD_CONST = 100,
+    LOAD_NAME = 101,
     MAKE_FUNCTION = 132
 }

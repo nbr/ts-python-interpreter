@@ -22,12 +22,12 @@ class PyFrame {
 
     //Access only push/pop
     valueStack: Array<PyObject>;
-    blockStack: Array<PyObject>; //TODO:PyTryBlock
+    blockStack: Array<PyObject>; //TODO:PyTryBlock class
 
     //use as associative arrays
-    locals: Array<string>; //local variables
-    globals: Array<string>; //global variables
-    builtins: Array<string>; //builtin variables
+    locals: Array<PyObject>; //local variables
+    globals: Array<PyObject>; //global variables
+    builtins: Array<PyObject>; //builtin variables
 
     //TODO: PyFrame constructor
     constructor(){
