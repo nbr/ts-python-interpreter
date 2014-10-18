@@ -6,21 +6,24 @@ import CodeObject = require('./CodeObject');
 import Dict = require('./Dict');
 import enums = require('./enums');
 import PyFrame = require('./PyFrame');
-import Exception = require('./Exceptions');
+import Exceptions = require('./Exceptions');
 
 class PyEval {
 
-    current_stack_frame: PyFrame = new PyFrame; //TODO: PyFr constructor
-    private stack: Array<PyObject>; //TODO: still needed?
-    private codeobj: CodeObject;
+    private current_stack_frame: PyFrame = new PyFrame;
+    private callStack: Array<PyObject>;
+    //private codeobj: CodeObject;
 
-    constructor(codeobj:CodeObject) {
-        this.codeobj = codeobj;
-        this.stack = new Array<PyObject>();
+    constructor(current_stack_frame: PyFrame) {
+        //     (codeobj: CodeObject         )
+        //this.codeobj = codeobj;
+        this.current_stack_frame = current_stack_frame;
+        this.callStack = new Array<PyObject>();
     }
 
+    //modeling on ceval.c : PyEval_EvalFrameEx
     execute():void {
-        var code:FileWrapper = this.codeobj.getCode().getValue();
+        var code:FileWrapper = this.current_stack_frame.code.getCode().getValue();
         code.seek(0);
         while (code.getOffset() < code.getBufLength()) {
             this.runOp(code);
@@ -36,12 +39,12 @@ class PyEval {
     }
 
     private rot(n:number):void {
-        var len:number = this.stack.length;
-        var top:any = this.stack[len - 1];
+        var len:number = this.callStack.length;
+        var top:any = this.callStack[len - 1];
         for (var i:number = 1; i < n; i++) {
-            this.stack[len - i] = this.stack[len - i - 1];
+            this.callStack[len - i] = this.callStack[len - i - 1];
         }
-        this.stack[len - n] = top;
+        this.callStack[len - n] = top;
     }
 
     private isPyNum(type: enums.PyType):boolean {
@@ -53,32 +56,38 @@ class PyEval {
     runOp() instead of switch statements*/
 
 
-    //TODO:#?, type of param?, Exception
-    //Credit to Python Innards for Python syntax version.
+    //TODO:type of param?
+    //101
+    //Credit to Python Innards for Python-syntax version.
     private LOAD_NAME(name: any) {
+        var NameError: Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
         try{
             return this.current_stack_frame.locals;
         }
-        catch(e){
+        catch(NameError){
             try{
                 return this.current_stack_frame.globals[name];
             }
-            catch(e){
+            catch(NameError){
                 try{
                     return this.current_stack_frame.builtins[name];
                 }
-                catch(e){
-                   console.log("" + name + "IS NOT DEFINED");
-                   //throw new Exception("" + name + "not defined");
+                catch(NameError){
+                   throw NameError;
                 }
             }
         }
     }
+    //90
     private STORE_NAME(name: any,value: any){
         this.current_stack_frame.locals[name] = value;
     }
 
-    //??
+    //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
+    private LOAD_FAST(){}
+    private STORE_FAST(){}
+    private LOAD_GLOBAL(){}
+    private STORE_GLOBAL(){}
 
     //0
     private STOP_CODE(fw: FileWrapper):void {
@@ -87,7 +96,7 @@ class PyEval {
 
     //1
     private POP_TOP(fw: FileWrapper):void {
-        this.stack.pop();
+        this.callStack.pop();
     }
 
     //2
@@ -102,7 +111,7 @@ class PyEval {
 
     //4
     private DUP_TOP(fw:FileWrapper):void {
-        this.stack.push(this.stack[this.stack.length - 1]);
+        this.callStack.push(this.callStack[this.callStack.length - 1]);
     }
 
     //5
@@ -117,28 +126,28 @@ class PyEval {
 
     //10
     private UNARY_POSITIVE(fw:FileWrapper):void {
-        var v:PyObject = this.stack.pop();
+        var v:PyObject = this.callStack.pop();
         if (!this.isPyNum(v.getType())) {
             v = new PyObject(enums.PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
         }
-        this.stack.push(v);
+        this.callStack.push(v);
     }
 
     //11
     private UNARY_NEGATIVE(fw:FileWrapper):void {
-        var v:PyObject = this.stack.pop();
+        var v:PyObject = this.callStack.pop();
         if (!this.isPyNum(v.getType())) {
             v = new PyObject(enums.PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
         }
         else {
             v = new PyObject(v.getType(), -1 * v.getValue());
         }
-        this.stack.push(v);
+        this.callStack.push(v);
     }
 
     //12
     private UNARY_NOT(fw:FileWrapper):void {
-        var v:PyObject = this.stack.pop();
+        var v:PyObject = this.callStack.pop();
         var b:boolean;
         switch (v.getType()) {
             case enums.PyType.TYPE_NULL:
@@ -210,13 +219,13 @@ class PyEval {
         else {
             p = new PyObject(enums.PyType.TYPE_FALSE, undefined);
         }
-        this.stack.push(p);
+        this.callStack.push(p);
     }
 
     //100
     private LOAD_CONST(fw:FileWrapper):void {
         var index:number = this.getArg(fw);
-        this.stack.push(this.codeobj.getConst(index));
+        this.callStack.push(this.current_stack_frame.code.getConst(index));
     }
 
     //132
