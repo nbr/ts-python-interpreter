@@ -1,20 +1,22 @@
 import Dict = require('./Dict');
 import CodeObject = require('./CodeObject');
 import PyObject = require('./PyObject');
+import PyThreadState = require('./PyThreadState');
 
 class PyFrame {
 
     back: PyFrame; //previous frame or null
     code: CodeObject;
 
-    //TODO: trace: PyObject; ?
-    f_exc_type: PyObject;
+    /*TODO?: trace: PyObject;
+    f_lineno: number;*/
+    /*TODO?: exception fields? f_exc_type: PyObject;
     f_exc_value: PyObject;
-    f_exc_traceback: PyObject;
+    f_exc_traceback: PyObject;*/
 
-    //f_tstate: PyThreadState;
-    f_lasti: number;
-    f_lineno: number;
+    tstate: PyThreadState;
+
+    last_i: number;
     f_iblock: number;
 
     f_localsplus: Array<any>; //locals+cells+free_var+valstack
@@ -29,11 +31,13 @@ class PyFrame {
     globals: Array<PyObject>; //global variables
     builtins: Array<PyObject>; //builtin variables
 
-    //TODO: PyFrame constructor
-    constructor(){
+    constructor(code: CodeObject, back: PyFrame){
         this.locals = [];
         this.globals = [];
         this.builtins = [];
+        this.code = code;
+        this.back = back;
+        this.last_i = -1;
     }
 }
 export = PyFrame;

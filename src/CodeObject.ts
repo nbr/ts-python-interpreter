@@ -59,10 +59,6 @@ class CodeObject{
     this.lnotab = lnotab;
   }
 
-//This is currently never used
-/*  execute(){
-    new PyEval(this).execute();
-  }*/
   getCode(): PyObject{
     return this.code;
   }

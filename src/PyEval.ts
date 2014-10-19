@@ -7,35 +7,39 @@ import Dict = require('./Dict');
 import enums = require('./enums');
 import PyFrame = require('./PyFrame');
 import Exceptions = require('./Exceptions');
+import PyThreadState = require('./PyThreadState');
 
 class PyEval {
 
-    private current_stack_frame:PyFrame = new PyFrame;
+    private pyThreadState_current;
     private callStack:Array<PyObject>;
-    //private codeobj: CodeObject;
 
-    constructor(current_stack_frame:PyFrame) {
-        //     (codeobj: CodeObject         )
-        //this.codeobj = codeobj;
-        this.current_stack_frame = current_stack_frame;
+    //         (codes: Array<CodeObject>) {
+    constructor(code: CodeObject) {
+        this.pyThreadState_current = new PyThreadState(new PyFrame(code,null));
         this.callStack = new Array<PyObject>();
     }
 
-    //modeling on ceval.c : PyEval_EvalFrameEx
+    //ceval.c : PyEval_EvalFrameEx
     execute():void {
-        var code:FileWrapper = this.current_stack_frame.code.getCode().getValue();
-        code.seek(0);
-        while (code.getOffset() < code.getBufLength()) {
-            this.runOp(code);
+        var opCodes:FileWrapper = this.pyThreadState_current.current_stack_frame.code.getCode().getValue();
+        opCodes.seek(0);
+        while (opCodes.getOffset() < opCodes.getBufLength()) {
+            this.runOp(opCodes);
         }
     }
 
     //TODO: will fail on unimpl opcodes
     private runOp(fw:FileWrapper):void {
-        var opcode:number = fw.getUInt8();
-        console.log(opcode);
+        var currOpcode: number = fw.getUInt8();
+        console.log(currOpcode);
         //assert(lookupTable[i] != null, "Missing implementation of opcode " + enums.OpList[i]);
-        this[enums.OpList[fw.getUInt8()]].call(this, fw);
+        if(this[enums.OpList[fw.getUInt8()]]) {
+            this[enums.OpList[fw.getUInt8()]].call(this, fw);
+        }
+        else{
+            console.log("Missing impl of opcode");
+        }
     }
 
     private rot(n:number):void {
@@ -55,21 +59,21 @@ class PyEval {
      ~= ceval.c ln 1112-2824
      runOp() instead of switch statements*/
 
-    //TODO:type of param?
     //101
     //Credit to Python Innards for Python-syntax version.
-    private LOAD_NAME(name:any):void {
+    //TODO: is the typing right here
+    private LOAD_NAME(name: any): PyObject {
         var NameError:Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
         try {
-            this.current_stack_frame.valueStack.push(this.current_stack_frame.locals[name]);
+            return this.pyThreadState_current.current_stack_frame.locals[name];
         }
         catch (NameError) {
             try {
-                this.current_stack_frame.valueStack.push(this.current_stack_frame.globals[name]);
+                return this.pyThreadState_current.current_stack_frame.globals[name];
             }
             catch (NameError) {
                 try {
-                    this.current_stack_frame.valueStack.push(this.current_stack_frame.builtins[name]);
+                    return this.pyThreadState_current.current_stack_frame.builtins[name];
                 }
                 catch (NameError) {
                     throw NameError;
@@ -80,7 +84,7 @@ class PyEval {
 
     //90
     private STORE_NAME(name:any, value:any) {
-        this.current_stack_frame.locals[name] = value;
+        this.pyThreadState_current.current_stack_frame.locals[name] = value;
     }
 
     //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
@@ -232,7 +236,7 @@ class PyEval {
     //100
     private LOAD_CONST(fw:FileWrapper):void {
         var index:number = this.getArg(fw);
-        this.callStack.push(this.current_stack_frame.code.getConst(index));
+        this.callStack.push(this.pyThreadState_current.current_stack_frame.code.getConst(index));
     }
 
     //132

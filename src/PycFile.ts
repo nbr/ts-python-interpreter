@@ -1,5 +1,6 @@
 import CodeObject = require('./CodeObject');
 import PyObject = require('./PyObject');
+import PyEval = require('./PyEval')
 
 class PycFile{
   //thanks to http://nedbatchelder.com/blog/200804/the_structure_of_pyc_files.html
@@ -14,8 +15,7 @@ class PycFile{
     this.codeobj = codeobj;
   }
   interpret(){
-    //TODO: is this PyEval execute?
-    this.codeobj.getValue().execute();
+    new PyEval(this.codeobj.getValue()).execute();
   }
   stringify(): string{
     return JSON.stringify(this);
