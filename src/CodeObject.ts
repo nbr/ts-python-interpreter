@@ -1,4 +1,4 @@
-import PyEval = require('./PyEval');
+import PyEval = require('./PyInterpreterState');
 import Tuple = require('./Tuple');
 import FileWrapper = require('./FileWrapper');
 import PyObject = require('./PyObject');
