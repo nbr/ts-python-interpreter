@@ -1,4 +1,5 @@
 import PyFrame = require('./PyFrame');
+import CodeObject = require('./CodeObject');
 
 class PyThreadState{
 
@@ -20,7 +21,5 @@ class PyThreadState{
   pushFrame(frame: PyFrame): void {
     this.frameStack.push(frame);
   }
-
 }
-
 export = PyThreadState;

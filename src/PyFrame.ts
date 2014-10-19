@@ -6,7 +6,6 @@ import PyObject = require('./PyObject');
 import CodeObject = require('./CodeObject');
 import Dict = require('./Dict');
 import enums = require('./enums');
-import PyFrame = require('./PyFrame');
 import Exceptions = require('./Exceptions');
 import PyThreadState = require('./PyThreadState');
 

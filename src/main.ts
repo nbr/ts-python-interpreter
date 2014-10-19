@@ -5,7 +5,7 @@ import FileWrapperNode = require('./FileWrapperNode');
 import CodeObject = require('./CodeObject');
 import PycFile = require('./PycFile');
 import PycParser = require('./PycParser');
-import PyEval = require('./PyInterpreterState');
+import PyInterpreterState = require('./PyInterpreterState');
 
 fs.readFile('./sample_pycs/helloworld.pyc', function afterRead(err, buffer: NodeBuffer){
   if(err) { throw err; }
