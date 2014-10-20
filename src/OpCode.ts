@@ -1,4 +1,4 @@
-enum OpCode{
-};
+class OpCode {
 
+}
 export = OpCode;

@@ -8,6 +8,7 @@ import Dict = require('./Dict');
 import enums = require('./enums');
 import Exceptions = require('./Exceptions');
 import PyThreadState = require('./PyThreadState');
+import Stack = require('./Stack');
 
 class PyFrame {
 
@@ -26,9 +27,8 @@ class PyFrame {
   f_localsplus: Array<any>; //locals+cells+free_var+valstack
   //i.e. co_nlocals,co_cellvars,co_freevars,co_stacksize
 
-  //Access only push/pop; TODO:Stack class?
-  valueStack: Array<PyObject>; //Opcode arguments (if applicable)
-  blockStack: Array<PyObject>; //TODO:PyTryBlock class
+  valueStack: Stack<PyObject>; //Opcode arguments (if applicable)
+  blockStack: Stack<PyObject>; //TODO:PyTryBlock class
 
   //use as associative arrays
   locals: Array<PyObject>; //local variables
@@ -58,7 +58,6 @@ class PyFrame {
   private runOp(fw:FileWrapper):void {
     var currOpcode: number = fw.getUInt8();
     console.log(currOpcode);
-    //assert(lookupTable[i] != null, "Missing implementation of opcode " + enums.OpList[i]);
     if(this[enums.OpList[fw.getUInt8()]]) {
       this[enums.OpList[fw.getUInt8()]].call(this, fw);
     }
@@ -68,7 +67,7 @@ class PyFrame {
   }
 
   private rot(n:number):void {
-    var len:number = this.valueStack.length;
+    var len:number = this.valueStack.length();
     var top:any = this.valueStack[len - 1];
     for (var i:number = 1; i < n; i++) {
       this.valueStack[len - i] = this.valueStack[len - i - 1];
@@ -148,7 +147,7 @@ class PyFrame {
 
   //4
   private DUP_TOP(fw:FileWrapper):void {
-    this.valueStack.push(this.valueStack[this.valueStack.length - 1]);
+    this.valueStack.push(this.valueStack[this.valueStack.length() - 1]);
   }
 
   //5
