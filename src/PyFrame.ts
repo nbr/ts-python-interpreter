@@ -42,6 +42,8 @@ class PyFrame {
     this.code = code;
     this.last_i = -1;
     this.tstate = tstate;
+    this.valueStack = new Stack<PyObject>();
+    this.blockStack = new Stack<PyObject>();
   }
 
   //ceval.c : PyEval_EvalFrameEx
@@ -58,8 +60,8 @@ class PyFrame {
   private runOp(fw:FileWrapper):void {
     var currOpcode: number = fw.getUInt8();
     console.log(currOpcode);
-    if(this[enums.OpList[fw.getUInt8()]]) {
-      this[enums.OpList[fw.getUInt8()]].call(this, fw);
+    if(this[enums.OpList[currOpcode]]) {
+      this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
       console.log("Missing impl of opcode");
@@ -82,48 +84,6 @@ class PyFrame {
   /*Opcodes
    ~= ceval.c ln 1112-2824
    runOp() instead of switch statements*/
-
-  //101
-  //Credit to Python Innards for Python-syntax version.
-  //TODO: is the typing right here
-  //TODO: returns should be callStack pushes
-  private LOAD_NAME(name: any): PyObject {
-    var NameError:Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
-    try {
-      return this.locals[name];
-    }
-    catch (NameError) {
-      try {
-        return this.globals[name];
-      }
-      catch (NameError) {
-        try {
-          return this.builtins[name];
-        }
-        catch (NameError) {
-          throw NameError;
-        }
-      }
-    }
-  }
-
-  //90
-  private STORE_NAME(name:any, value:any) {
-    this.locals[name] = value;
-  }
-
-  //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
-  private LOAD_FAST() {
-  }
-
-  private STORE_FAST() {
-  }
-
-  private LOAD_GLOBAL() {
-  }
-
-  private STORE_GLOBAL() {
-  }
 
   //0
   private STOP_CODE(fw:FileWrapper):void {
@@ -258,16 +218,63 @@ class PyFrame {
     this.valueStack.push(p);
   }
 
+  //90
+  //TODO: should the stack be popped?
+  private STORE_NAME(name:any, value:any) {
+    this.locals[name] = value;
+  }
+
+  //97
+  private STORE_GLOBAL() {
+  }
+
   //100
   private LOAD_CONST(fw:FileWrapper):void {
     var index:number = this.getArg(fw);
     this.valueStack.push(this.code.getConst(index));
   }
 
+  //101
+  //Credit to Python Innards for Python-syntax version.
+  //TODO: is the typing right here
+  //TODO: returns should be callStack pushes
+  private LOAD_NAME(name: any): PyObject {
+    var NameError:Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
+    try {
+      return this.locals[name];
+    }
+    catch (NameError) {
+      try {
+        return this.globals[name];
+      }
+      catch (NameError) {
+        try {
+          return this.builtins[name];
+        }
+        catch (NameError) {
+          throw NameError;
+        }
+      }
+    }
+  }
+
+  //116
+  private LOAD_GLOBAL() {
+  }
+
+  //124
+  //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
+  private LOAD_FAST() {
+  }
+
+  //125
+  private STORE_FAST() {
+  }
+
   //132
   private MAKE_FUNCTION(fw:FileWrapper):void {
-    var paramCnt:number = this.getArg(fw);
-    console.log(paramCnt);
+    var paramCnt: number = this.getArg(fw);
+    console.log('paramCnt='+paramCnt);
   }
 
   private getArg(fw:FileWrapper):number {
