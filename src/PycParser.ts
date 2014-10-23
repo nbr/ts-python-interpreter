@@ -1,5 +1,5 @@
 import FileWrapper = require('./FileWrapper');
-import CodeObject = require('./CodeObject');
+import PyCodeObject = require('./PyCodeObject');
 import PycFile = require('./PycFile');
 import MarshalParser = require('./MarshalParser');
 import PyObject = require('./PyObject');
@@ -7,7 +7,7 @@ import PyObject = require('./PyObject');
 export function parse(fw: FileWrapper): PycFile{
   var magicno: any = parseMagicNumber(fw);
   var modtime: Date = parseModTimeStamp(fw);
-  var codeobj: PyObject = MarshalParser.parse(fw);
+  var codeobj: PyCodeObject = <PyCodeObject> MarshalParser.parse(fw);
   return new PycFile(magicno, modtime, codeobj);
 }
 function parseMagicNumber(fw: FileWrapper): any{

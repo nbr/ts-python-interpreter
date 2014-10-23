@@ -1,24 +1,26 @@
-import Tuple = require('./Tuple');
+import PyTuple = require('./PyTuple');
 import FileWrapper = require('./FileWrapper');
 import PyObject = require('./PyObject');
+import PyString = require('./PyString');
+import enums = require('./enums');
 
-class CodeObject{
+class PyCodeObject extends PyObject{
   //thanks to http://daeken.com/2010-02-20_Python_Marshal_Format.html
   //Python code object fields
   private argcount: number;
   private nlocals: number;
   private stacksize: number;
   private flags: number; //figure out bit operations or maybe switch to enums
-  private code: PyObject;
-  private consts: PyObject;
-  private names: PyObject; //pretty sure only strings here
-  private varnames: PyObject; //pretty sure only strings here
-  private freevars: PyObject;
-  private cellvars: PyObject;
-  private filename: PyObject;
-  private name: PyObject;
+  private code: PyString;
+  private consts: PyTuple<PyObject>;
+  private names: PyTuple<PyObject>; //pretty sure only strings here
+  private varnames: PyTuple<PyObject>; //pretty sure only strings here
+  private freevars: PyTuple<PyObject>;
+  private cellvars: PyTuple<PyObject>;
+  private filename: PyString;
+  private name: PyString;
   private firstlineno: number;
-  private lnotab: PyObject;
+  private lnotab: PyString;
 
   //Implementation variables
   //Looking at CALL_FUNCTION of dis it seems as though
@@ -32,16 +34,17 @@ class CodeObject{
       nlocals: number,
       stacksize: number,
       flags: number,
-      code: PyObject,
-      consts: PyObject,
-      names: PyObject,
-      varnames: PyObject,
-      freevars: PyObject,
-      cellvars: PyObject,
-      filename: PyObject,
-      name: PyObject,
+      code: PyString,
+      consts: PyTuple<PyObject>,
+      names: PyTuple<PyObject>,
+      varnames: PyTuple<PyObject>,
+      freevars: PyTuple<PyObject>,
+      cellvars: PyTuple<PyObject>,
+      filename: PyString,
+      name: PyString,
       firstlineno: number,
-      lnotab: PyObject){
+      lnotab: PyString){
+    super(enums.PyType.TYPE_CODE);
     this.argcount = argcount;
     this.nlocals = nlocals;
     this.stacksize = stacksize;
@@ -58,15 +61,15 @@ class CodeObject{
     this.lnotab = lnotab;
   }
 
-  getCode(): PyObject{
+  getCode(): PyString{
     return this.code;
   }
   getConst(index: number): PyObject{
-    return this.consts.getValue().getItem(index);
+    return this.consts.getItem(index);
   }
 }
 interface CodeOffsetToLineNoMap{
   [index: number]: number;
 }
 
-export = CodeObject;
+export = PyCodeObject;

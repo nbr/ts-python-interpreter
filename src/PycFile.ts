@@ -1,5 +1,4 @@
-import CodeObject = require('./CodeObject');
-import PyObject = require('./PyObject');
+import PyCodeObject = require('./PyCodeObject');
 import PyEval = require('./PyInterpreterState')
 
 class PycFile{
@@ -7,15 +6,18 @@ class PycFile{
   //Python pyc file fields
   private magicno: any; //type?
   private modtime: Date;
-  codeobj: PyObject;
+  private codeobj: PyCodeObject;
 
-  constructor(magicno: any, modtime: Date, codeobj: PyObject){
+  constructor(magicno: any, modtime: Date, codeobj: PyCodeObject){
     this.magicno = magicno;
     this.modtime = modtime;
     this.codeobj = codeobj;
   }
   stringify(): string{
     return JSON.stringify(this);
+  }
+  getCodeobj(): PyCodeObject{
+    return this.codeobj;
   }
 }
 

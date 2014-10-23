@@ -3,8 +3,7 @@ import FileWrapper = require('./FileWrapper');
 import PyError = require('./PyError');
 import PyErrorType = require('./PyErrorType');
 import PyObject = require('./PyObject');
-import CodeObject = require('./CodeObject');
-import Dict = require('./Dict');
+import PyCodeObject = require('./PyCodeObject');
 import enums = require('./enums');
 import Exceptions = require('./Exceptions');
 import PyThreadState = require('./PyThreadState');
@@ -12,7 +11,7 @@ import Stack = require('./Stack');
 
 class PyFrame {
 
-  code: CodeObject;
+  code: PyCodeObject;
   /*TODO?: trace: PyObject;
    f_lineno: number;*/
   /*TODO?: exception fields? f_exc_type: PyObject;
@@ -35,7 +34,7 @@ class PyFrame {
   globals: Array<PyObject>; //global variables
   builtins: Array<PyObject>; //builtin variables
 
-  constructor(code: CodeObject, tstate: PyThreadState){
+  constructor(code: PyCodeObject, tstate: PyThreadState){
     this.locals = [];
     this.globals = [];
     this.builtins = [];
@@ -48,7 +47,7 @@ class PyFrame {
 
   //ceval.c : PyEval_EvalFrameEx
   evalFrame(): void {
-    var opCodes:FileWrapper = this.code.getCode().getValue();
+    var opCodes:FileWrapper = this.code.getCode().getFileWrapper();
     opCodes.seek(0);
     while (opCodes.getOffset() < opCodes.getBufLength()) {
       this.runOp(opCodes);
@@ -64,12 +63,12 @@ class PyFrame {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
-      console.log("Missing impl of opcode");
+      throw "Missing impl of opcode";
     }
   }
 
   private rot(n:number):void {
-    var len:number = this.valueStack.length();
+    var len:number = this.valueStack.getLength();
     var top:any = this.valueStack[len - 1];
     for (var i:number = 1; i < n; i++) {
       this.valueStack[len - i] = this.valueStack[len - i - 1];
@@ -107,7 +106,7 @@ class PyFrame {
 
   //4
   private DUP_TOP(fw:FileWrapper):void {
-    this.valueStack.push(this.valueStack[this.valueStack.length() - 1]);
+    this.valueStack.push(this.valueStack[this.valueStack.getLength() - 1]);
   }
 
   //5
@@ -121,6 +120,8 @@ class PyFrame {
   }
 
   //10
+  //TODO: redo using class methods
+  /*
   private UNARY_POSITIVE(fw:FileWrapper):void {
     var v:PyObject = this.valueStack.pop();
     if (!this.isPyNum(v.getType())) {
@@ -128,8 +129,11 @@ class PyFrame {
     }
     this.valueStack.push(v);
   }
+  */
 
   //11
+  //TODO: redo using class methods
+  /*
   private UNARY_NEGATIVE(fw:FileWrapper):void {
     var v:PyObject = this.valueStack.pop();
     if (!this.isPyNum(v.getType())) {
@@ -140,8 +144,11 @@ class PyFrame {
     }
     this.valueStack.push(v);
   }
+  */
 
   //12
+  //TODO: redo using class methods
+  /*
   private UNARY_NOT(fw:FileWrapper):void {
     var v:PyObject = this.valueStack.pop();
     var b:boolean;
@@ -217,6 +224,7 @@ class PyFrame {
     }
     this.valueStack.push(p);
   }
+  */
 
   //90
   //TODO: should the stack be popped?
@@ -274,7 +282,7 @@ class PyFrame {
   //132
   private MAKE_FUNCTION(fw:FileWrapper):void {
     var paramCnt: number = this.getArg(fw);
-    console.log('paramCnt='+paramCnt);
+    var codeobj: PyObject = this.valueStack.pop();
   }
 
   private getArg(fw:FileWrapper):number {

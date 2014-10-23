@@ -1,6 +1,6 @@
 class Stack<T> {
 
-  private stack;
+  private stack: T[];
 
   constructor(){
     this.stack = new Array<T>();
@@ -13,8 +13,8 @@ class Stack<T> {
     this.stack.push(item);
   }
 
-  length(): number {
-    return this.stack.length();
+  getLength(): number {
+    return this.stack.length;
   }
 
 }

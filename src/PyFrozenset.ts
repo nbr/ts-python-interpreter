@@ -1,6 +1,10 @@
-class Tuple<T>{
+import PyObject = require('./PyObject');
+import enums = require('./enums');
+
+class PyFrozenset<T> extends PyObject{
   private array: T[];
   constructor(array: T[]){
+    super(enums.PyType.TYPE_FROZENSET);
     this.array = array.slice(0);
   }
   getItem(index: number): T{
@@ -11,4 +15,4 @@ class Tuple<T>{
   }
 }
 
-export = Tuple;
+export = PyFrozenset;

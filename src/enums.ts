@@ -25,7 +25,10 @@ export enum PyType{
   TYPE_DICT = 19,
   TYPE_FROZENSET = 20,
   TYPE_CODE = 21,
-  TYPE_ERROR = 22
+
+  //added
+  TYPE_FUNCTION = 22,
+  TYPE_ERROR = 23
 }
 
 export enum PyErrorType{
@@ -40,9 +43,9 @@ export enum OpList {
   DUP_TOP = 4,
   ROT_FOUR = 5,
   NOP = 9,
-  UNARY_POSITIVE = 10,
-  UNARY_NEGATIVE = 11,
-  UNARY_NOT = 12,
+  //UNARY_POSITIVE = 10,
+  //UNARY_NEGATIVE = 11,
+  //UNARY_NOT = 12,
   STORE_NAME = 90,
   LOAD_CONST = 100,
   LOAD_NAME = 101,

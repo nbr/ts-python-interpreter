@@ -1,6 +1,10 @@
-class Frozenset<T>{
+import PyObject = require('./PyObject');
+import enums = require('./enums');
+
+class PyList<T> extends PyObject{
   private array: T[];
   constructor(array: T[]){
+    super(enums.PyType.TYPE_LIST);
     this.array = array.slice(0);
   }
   getItem(index: number): T{
@@ -11,4 +15,4 @@ class Frozenset<T>{
   }
 }
 
-export = Frozenset;
+export = PyList;

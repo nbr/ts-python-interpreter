@@ -2,7 +2,7 @@
 import fs = require('fs');
 import FileWrapper = require('./FileWrapper');
 import FileWrapperNode = require('./FileWrapperNode');
-import CodeObject = require('./CodeObject');
+import PyCodeObject = require('./PyCodeObject');
 import PycFile = require('./PycFile');
 import PycParser = require('./PycParser');
 import PyInterpreterState = require('./PyInterpreterState');
@@ -12,5 +12,5 @@ fs.readFile('./sample_pycs/helloworld.pyc', function afterRead(err, buffer: Node
   var fw: FileWrapper = new FileWrapperNode(buffer);
   var pyc: PycFile = PycParser.parse(fw);
   console.log(pyc.stringify());
-  return new PyInterpreterState(pyc.codeobj.getValue());
+  return new PyInterpreterState(pyc.getCodeobj());
 });
