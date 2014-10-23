@@ -3,22 +3,23 @@ import enums = require('./enums');
 
 //TODO: Fix
 //O(n) lookups and inserts yay! Wait, booooo!
-class PyDict{
-  private keys: PyObject[];
-  private values: PyObject[];
+//tried to use https://github.com/flesler/hashmap
+//but no worky. I should copy the hash function.
+class PyDict<K, V>{
+  private keys: K[];
+  private values: V[];
   private size: number;
-  constructor(keys: PyObject[], values: PyObject[]){
-    this.keys = keys;
-    this.values = values;
-    this.size = keys.length;
+  constructor(){
+    this.keys = new Array<K>();
+    this.values = new Array<V>();
+    this.size = 0;
   }
-  getItem(key: PyObject): PyObject{
+  get(key: K): V{
     var index: number = this.getKeyIndex(key);
     if(index === -1){ return undefined; }
     return this.values[index];
   }
-  //probably need to tighten up the typing here
-  putItem(key: PyObject, value: PyObject): void{
+  put(key: K, value: V): void{
     var index: number = this.getKeyIndex(key);
     if(index === -1){
       this.size++;
@@ -28,10 +29,10 @@ class PyDict{
     }
     this.values[index] = value;
   }
-  getLength(): number{
+  count(): number{
     return this.size;
   }
-  private getKeyIndex(key: PyObject): number{
+  private getKeyIndex(key: K): number{
     return this.keys.indexOf(key);
   }
 }

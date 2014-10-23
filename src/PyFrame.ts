@@ -8,6 +8,7 @@ import enums = require('./enums');
 import Exceptions = require('./Exceptions');
 import PyThreadState = require('./PyThreadState');
 import Stack = require('./Stack');
+import PyDict = require('./PyDict');
 
 class PyFrame {
 
@@ -30,14 +31,14 @@ class PyFrame {
   blockStack: Stack<PyObject>; //TODO:PyTryBlock class
 
   //use as associative arrays
-  locals: Array<PyObject>; //local variables
-  globals: Array<PyObject>; //global variables
-  builtins: Array<PyObject>; //builtin variables
+  locals: PyDict<PyObject, PyObject>; //local variables
+  globals: PyDict<PyObject, PyObject>; //global variables
+  builtins: PyDict<PyObject, PyObject>; //builtin variables
 
   constructor(code: PyCodeObject, tstate: PyThreadState){
-    this.locals = [];
-    this.globals = [];
-    this.builtins = [];
+    this.locals = new PyDict<PyObject, PyObject>();
+    this.globals = new PyDict<PyObject, PyObject>();
+    this.builtins = new PyDict<PyObject, PyObject>();
     this.code = code;
     this.last_i = -1;
     this.tstate = tstate;

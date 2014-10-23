@@ -117,16 +117,15 @@ function typeList(fw: FileWrapper): PyList<PyObject>{
   var count: number = fw.getInt32();
   return new PyList<PyObject>(getNextN(count, fw));
 }
-function typeDict(fw: FileWrapper): PyDict{
-  var keys: PyObject[] = [];
-  var values: PyObject[] = [];
+function typeDict(fw: FileWrapper): PyDict<PyObject, PyObject>{
+  var d: PyDict<PyObject, PyObject> = new PyDict<PyObject, PyObject>();
   var key: PyObject = parse(fw);
   while(key.getType() !== enums.PyType.TYPE_NULL){
-    keys.push(key);
-    values.push(parse(fw));
+    var value: PyObject = parse(fw);
+    d.put(key, value);
     key = parse(fw);
   }
-  return new PyDict(keys, values);
+  return d;
 }
 function typeFrozenset(fw: FileWrapper): PyFrozenset<PyObject>{
   var count: number = fw.getInt32();
