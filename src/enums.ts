@@ -28,7 +28,8 @@ export enum PyType{
 
   //added
   TYPE_FUNCTION = 22,
-  TYPE_ERROR = 23
+  TYPE_CELL = 23,
+  TYPE_ERROR = 24
 }
 
 export enum PyErrorType{

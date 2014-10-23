@@ -60,12 +60,26 @@ class PyCodeObject extends PyObject{
     this.firstlineno = firstlineno;
     this.lnotab = lnotab;
   }
-
+  setName(name: PyString): void{
+    this.name = name;
+  }
+  getName(): PyString{
+    return this.name;
+  }
+  setFilename(filename: PyString): void{
+    this.filename = filename;
+  }
+  getFilename(): PyString{
+    return this.filename;
+  }
   getCode(): PyString{
     return this.code;
   }
   getConst(index: number): PyObject{
     return this.consts.getItem(index);
+  }
+  getConstsSize(): number{
+    return this.consts.getLength();
   }
 }
 interface CodeOffsetToLineNoMap{
