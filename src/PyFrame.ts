@@ -9,6 +9,8 @@ import Exceptions = require('./Exceptions');
 import PyThreadState = require('./PyThreadState');
 import Stack = require('./Stack');
 import PyDict = require('./PyDict');
+import PyTuple = require('./PyTuple');
+import PyFunction = require('./PyFunction');
 
 class PyFrame {
 
@@ -283,7 +285,15 @@ class PyFrame {
   //132
   private MAKE_FUNCTION(fw:FileWrapper):void {
     var paramCnt: number = this.getArg(fw);
-    var codeobj: PyObject = this.valueStack.pop();
+    var codeobj: PyCodeObject = <PyCodeObject> this.valueStack.pop();
+    var opargs: PyObject[] = new Array<PyObject>();
+    for(var i: number = 0; i < paramCnt; i++){
+      opargs.push(this.valueStack.pop());
+    }
+    var func: PyFunction = new PyFunction(codeobj,
+      this.globals,
+      new PyTuple<PyObject>(opargs));
+    this.valueStack.push(func);
   }
 
   private getArg(fw:FileWrapper):number {

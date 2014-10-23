@@ -1,7 +1,11 @@
 import PyObject = require('./PyObject');
 import PyCodeObject = require('./PyCodeObject');
 import PyDict = require('./PyDict');
+import PyTuple = require('./PyTuple');
 import PyNone = require('./PyNone');
+import PyCell = require('./PyCell');
+import PyString = require('./PyString');
+import PyList = require('./PyList');
 import enums = require('./enums');
 
 class PyFunction extends PyObject{
@@ -10,25 +14,28 @@ class PyFunction extends PyObject{
   private defaults: PyTuple<PyObject>;
   private closure: PyTuple<PyCell<PyObject>>;
   private doc: PyObject;
-  private name: PyString;
   private dict: PyDict<PyObject, PyObject>;
   private weakreflist: PyList<PyObject>;
-  private mod: PyObject;
+  private func_module: PyObject;
+  //name = codeobject name
+  //consts = codeobject consts
   
-  constructor(code: PyCodeObject, globals: PyDict<PyObject, PyObject>){
+  constructor(code: PyCodeObject,
+      globals: PyDict<PyObject, PyObject>,
+      defaults: PyTuple<PyObject>){
     super(enums.PyType.TYPE_FUNCTION);
     this.code = code;
     this.globals = globals;
+    this.defaults = defaults;
     if(this.code.getConstsSize() >=1){
-      this.doc = this.code.getConst();
+      this.doc = this.code.getConst(0);
     }
     else{ this.doc = new PyNone(); }
+    //TODO: There is more in funcobject.c
+    //dealing with func_module
   }
   getName(): PyString{
     return this.code.getName();
-  }
-  getConsts(): PyTuple<PyObject>{
-    return this.code.getConsts();
   }
 }
 
