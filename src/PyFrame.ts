@@ -230,7 +230,6 @@ class PyFrame {
   */
 
   //90
-  //TODO: should the stack be popped?
   private STORE_NAME(fw: FileWrapper): void{
     var index: number = this.getArg(fw);
     var key: PyObject = this.code.getNames().getItem(index);
@@ -244,32 +243,26 @@ class PyFrame {
 
   //100
   private LOAD_CONST(fw: FileWrapper): void{
-    var index:number = this.getArg(fw);
+    var index: number = this.getArg(fw);
     this.valueStack.push(this.code.getConst(index));
   }
 
   //101
   //Credit to Python Innards for Python-syntax version.
-  //TODO: is the typing right here
-  //TODO: returns should be callStack pushes
-  private LOAD_NAME(name: any): PyObject {
-    var NameError:Exceptions.Exception = new Exceptions.Exception("" + name + "not defined");
-    try {
-      return this.locals[name];
+  private LOAD_NAME(fw: FileWrapper): void{
+    var index: number = this.getArg(fw);
+    var key: PyObject = this.code.getNames().getItem(index);
+    var value: PyObject = this.locals.get(key);
+    if(value === undefined){
+      value = this.globals.get(key);
     }
-    catch (NameError) {
-      try {
-        return this.globals[name];
-      }
-      catch (NameError) {
-        try {
-          return this.builtins[name];
-        }
-        catch (NameError) {
-          throw NameError;
-        }
-      }
+    if(value === undefined){
+      value = this.builtins.get(key);
     }
+    if(value === undefined){
+      throw new Exceptions.Exception(JSON.stringify(key) + " not defined");
+    }
+    this.valueStack.push(value);
   }
 
   //116

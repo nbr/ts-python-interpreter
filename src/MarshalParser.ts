@@ -17,154 +17,173 @@ import PyInterned = require('./PyInterned');
 import PyStringref = require('./PyStringref');
 import PyUnicode= require('./PyUnicode');
 
-var typeParserMap = {
-  'O': function typeNull(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_NULL); },
-  'N': function typeNone(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_NONE); },
-  'F': function typeFalse(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_FALSE); },
-  'T': function typeTrue(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_TRUE); },
-  'S': function typeStopiter(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_STOPITER); },
-  '.': function typeEllipsis(fw: FileWrapper){ return new PyObject(enums.PyType.TYPE_ELLIPSIS); },
-  'i': typeInt,
-  'I': typeInt64,
-  'f': typeFloat,
-  'g': typeBinaryFloat,
-  'x': typeComplex,
-  'y': typeBinaryComplex,
-  'l': typeLong,
-  's': typeString,
-  't': typeInterned,
-  'R': typeStringref,
-  'u': typeUnicode,
-  '(': typeTuple,
-  '[': typeList,
-  '{': typeDict,
-  '>': typeFrozenset,
-  'c': typeCodeObject
-};
-export function parse(fw: FileWrapper): PyObject{
-  return typeParserMap[fw.getUtf8(1)](fw);
-}
-function typeInt(fw: FileWrapper): PyInt{
-  return new PyInt(fw.getInt32());
-}
-function typeInt64(fw: FileWrapper): PyInt64{
-  //is this reading order of low/high correct
-  //with respect to little endian?
-  var high: number = fw.getInt32();
-  var low: number = fw.getInt32();
-  return new PyInt64(gLong.fromBits(low,high));
-}
-function typeFloat(fw: FileWrapper): PyFloat{
-  var size: number = fw.getUInt8();
-  //not sure if the character encoding here is UTF-8
-  var s: string = fw.getUtf8(size);
-  return new PyFloat(Number(s));
-}
-function typeBinaryFloat(fw: FileWrapper): PyBinaryFloat{
-  return new PyBinaryFloat(fw.getDouble());
-}
-function typeComplex(fw: FileWrapper): PyObject{
-  //we still need to find a library to represent complex #
-  //see issue #12
-  var real: number = typeFloat(fw).getFloat();
-  var imaginary: number = typeFloat(fw).getFloat();
-  throw 'typeComplex broke!';
-  return undefined;
-}
-function typeBinaryComplex(fw: FileWrapper): PyObject{
-  //we still need to find a library to represent complex #
-  //see issue #12
-  var real: number = typeBinaryFloat(fw).getBinaryFloat();
-  var imaginary: number = typeBinaryFloat(fw).getBinaryFloat();
-  throw 'typeBinaryComplex broke!';
-  return undefined;
-}
-function typeLong(fw: FileWrapper): PyObject{
-  //this may not be correct. The blog post is
-  //unclear. marshal.c parses TYPE_LONG with
-  //r_PyLong on line 568
-  throw 'typeBinaryComplex broke!';
-  return new PyLong(0);
-}
-function typeString(fw: FileWrapper): PyString{
-  var size: number = fw.getInt32();
-  return new PyString(fw.getSlice(size));
-}
-//interned info:
-//https://docs.python.org/3.0/library/sys.html
-//http://stackoverflow.com/questions/15541404/python-string-interning
-function typeInterned(fw: FileWrapper): PyInterned{
-  //do we need to implement an intern list?
-  var size: number = fw.getInt32();
-  return new PyInterned(fw.getSlice(size));
-}
-//should this return a string that is a result of
-//the intern list lookup or just the number that
-//is the reference to the string in the interned
-//list?
-function typeStringref(fw: FileWrapper): PyStringref{
-  return new PyStringref(fw.getInt32());
-}
-function typeUnicode(fw: FileWrapper): PyUnicode{
-  var size: number = fw.getInt32();
-  return new PyUnicode(fw.getUtf8(size));
-}
-function typeTuple(fw: FileWrapper): PyTuple<PyObject>{
-  var count: number = fw.getInt32();
-  return new PyTuple<PyObject>(getNextN(count, fw));
-}
-function typeList(fw: FileWrapper): PyList<PyObject>{
-  var count: number = fw.getInt32();
-  return new PyList<PyObject>(getNextN(count, fw));
-}
-function typeDict(fw: FileWrapper): PyDict<PyObject, PyObject>{
-  var d: PyDict<PyObject, PyObject> = new PyDict<PyObject, PyObject>();
-  var key: PyObject = parse(fw);
-  while(key.getType() !== enums.PyType.TYPE_NULL){
-    var value: PyObject = parse(fw);
-    d.put(key, value);
-    key = parse(fw);
+class MarshalParser{
+  private typeParserMap = {
+    'O': function typeNull(){ return new PyObject(enums.PyType.TYPE_NULL); },
+    'N': function typeNone(){ return new PyObject(enums.PyType.TYPE_NONE); },
+    'F': function typeFalse(){ return new PyObject(enums.PyType.TYPE_FALSE); },
+    'T': function typeTrue(){ return new PyObject(enums.PyType.TYPE_TRUE); },
+    'S': function typeStopiter(){ return new PyObject(enums.PyType.TYPE_STOPITER); },
+    '.': function typeEllipsis(){ return new PyObject(enums.PyType.TYPE_ELLIPSIS); },
+    'i': this.typeInt,
+    'I': this.typeInt64,
+    'f': this.typeFloat,
+    'g': this.typeBinaryFloat,
+    'x': this.typeComplex,
+    'y': this.typeBinaryComplex,
+    'l': this.typeLong,
+    's': this.typeString,
+    't': this.typeInterned,
+    'R': this.typeStringref,
+    'u': this.typeUnicode,
+    '(': this.typeTuple,
+    '[': this.typeList,
+    '{': this.typeDict,
+    '>': this.typeFrozenset,
+    'c': this.typeCodeObject
+  };
+  private fw: FileWrapper;
+  private interned: PyString[];
+  constructor(){
   }
-  return d;
-}
-function typeFrozenset(fw: FileWrapper): PyFrozenset<PyObject>{
-  var count: number = fw.getInt32();
-  return new PyFrozenset<PyObject>(getNextN(count, fw));
-}
-function getNextN(n: number, fw: FileWrapper): PyObject[]{
-  var a: any[] = new Array();
-  for(var i: number = 0; i < n; i++){
-    a[i] = parse(fw);
+  parse(fw: FileWrapper): PyObject{
+    this.fw = fw;
+    this.interned = new Array<PyString>();
+    return this.parseNext();
   }
-  return a;
+  parseNext(): PyObject{
+    return this.typeParserMap[this.fw.getUtf8(1)].call(this);
+  }
+  typeInt(): PyInt{
+    return new PyInt(this.fw.getInt32());
+  }
+  typeInt64(): PyInt64{
+    //is this reading order of low/high correct
+    //with respect to little endian?
+    var high: number = this.fw.getInt32();
+    var low: number = this.fw.getInt32();
+    return new PyInt64(gLong.fromBits(low,high));
+  }
+  typeFloat(): PyFloat{
+    var size: number = this.fw.getUInt8();
+    //not sure if the character encoding here is UTF-8
+    var s: string = this.fw.getUtf8(size);
+    return new PyFloat(Number(s));
+  }
+  typeBinaryFloat(): PyBinaryFloat{
+    return new PyBinaryFloat(this.fw.getDouble());
+  }
+  typeComplex(): PyObject{
+    //we still need to find a library to represent complex #
+    //see issue #12
+    var real: number = this.typeFloat().getFloat();
+    var imaginary: number = this.typeFloat().getFloat();
+    throw 'typeComplex broke!';
+    return undefined;
+  }
+  typeBinaryComplex(): PyObject{
+    //we still need to find a library to represent complex #
+    //see issue #12
+    var real: number = this.typeBinaryFloat().getBinaryFloat();
+    var imaginary: number = this.typeBinaryFloat().getBinaryFloat();
+    throw 'typeBinaryComplex broke!';
+    return undefined;
+  }
+  typeLong(): PyObject{
+    //this may not be correct. The blog post is
+    //unclear. marshal.c parses TYPE_LONG with
+    //r_PyLong on line 568
+    throw 'typeBinaryComplex broke!';
+    return new PyLong(0);
+  }
+  typeString(): PyString{
+    var size: number = this.fw.getInt32();
+    return new PyString(this.fw.getSlice(size));
+  }
+  //interned info:
+  //https://docs.python.org/3.0/library/sys.html
+  //http://stackoverflow.com/questions/15541404/python-string-interning
+  typeInterned(): PyString{
+    //do we need to implement an intern list?
+    /*
+    var size: number = this.fw.getInt32();
+    return new PyInterned(this.fw.getSlice(size));
+    */
+    var s: PyString = this.typeString();
+    this.interned.push(s);
+    return s;
+  }
+  //should this return a string that is a result of
+  //the intern list lookup or just the number that
+  //is the reference to the string in the interned
+  //list?
+  typeStringref(): PyString{
+    //return new PyStringref(this.fw.getInt32());
+    return this.interned[this.fw.getInt32()];
+  }
+  typeUnicode(): PyUnicode{
+    var size: number = this.fw.getInt32();
+    return new PyUnicode(this.fw.getUtf8(size));
+  }
+  typeTuple(): PyTuple<PyObject>{
+    var count: number = this.fw.getInt32();
+    return new PyTuple<PyObject>(this.getNextN(count));
+  }
+  typeList(): PyList<PyObject>{
+    var count: number = this.fw.getInt32();
+    return new PyList<PyObject>(this.getNextN(count));
+  }
+  typeDict(): PyDict<PyObject, PyObject>{
+    var d: PyDict<PyObject, PyObject> = new PyDict<PyObject, PyObject>();
+    var key: PyObject = this.parseNext();
+    while(key.getType() !== enums.PyType.TYPE_NULL){
+      var value: PyObject = this.parseNext();
+      d.put(key, value);
+      key = this.parseNext();
+    }
+    return d;
+  }
+  typeFrozenset(): PyFrozenset<PyObject>{
+    var count: number = this.fw.getInt32();
+    return new PyFrozenset<PyObject>(this.getNextN(count));
+  }
+  getNextN(n: number): PyObject[]{
+    var a: any[] = new Array();
+    for(var i: number = 0; i < n; i++){
+      a[i] = this.parseNext();
+    }
+    return a;
+  }
+  typeCodeObject(): PyCodeObject{
+    var argcount: number = this.fw.getInt32();
+    var nlocals: number = this.fw.getInt32();
+    var stacksize: number = this.fw.getInt32();
+    var flags: number = this.fw.getInt32();
+    var code: PyString = <PyString> this.parseNext();
+    var consts: PyTuple<PyObject> = <PyTuple<PyObject>> this.parseNext();
+    var names: PyTuple<PyObject> = <PyTuple<PyObject>> this.parseNext();
+    var varnames: PyTuple<PyObject> = <PyTuple<PyObject>> this.parseNext();
+    var freevars: PyTuple<PyObject> = <PyTuple<PyObject>> this.parseNext();
+    var cellvars: PyTuple<PyObject> = <PyTuple<PyObject>> this.parseNext();
+    var filename: PyString = <PyString> this.parseNext();
+    var name: PyString = <PyString> this.parseNext();
+    var firstlineno: number = this.fw.getInt32();
+    var lnotab: PyString = <PyString> this.parseNext();
+    return new PyCodeObject(argcount,
+        nlocals,
+        stacksize,
+        flags,
+        code,
+        consts,
+        names,
+        varnames,
+        freevars,
+        cellvars,
+        filename,
+        name,
+        firstlineno,
+        lnotab);
+  }
 }
-function typeCodeObject(fw: FileWrapper): PyCodeObject{
-  var argcount: number = fw.getInt32();
-  var nlocals: number = fw.getInt32();
-  var stacksize: number = fw.getInt32();
-  var flags: number = fw.getInt32();
-  var code: PyString = <PyString> parse(fw);
-  var consts: PyTuple<PyObject> = <PyTuple<PyObject>> parse(fw);
-  var names: PyTuple<PyObject> = <PyTuple<PyObject>> parse(fw);
-  var varnames: PyTuple<PyObject> = <PyTuple<PyObject>> parse(fw);
-  var freevars: PyTuple<PyObject> = <PyTuple<PyObject>> parse(fw);
-  var cellvars: PyTuple<PyObject> = <PyTuple<PyObject>> parse(fw);
-  var filename: PyString = <PyString> parse(fw);
-  var name: PyString = <PyString> parse(fw);
-  var firstlineno: number = fw.getInt32();
-  var lnotab: PyString = <PyString> parse(fw);
-  return new PyCodeObject(argcount,
-      nlocals,
-      stacksize,
-      flags,
-      code,
-      consts,
-      names,
-      varnames,
-      freevars,
-      cellvars,
-      filename,
-      name,
-      firstlineno,
-      lnotab);
-}
+
+export = MarshalParser;
