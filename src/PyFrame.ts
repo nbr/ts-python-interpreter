@@ -14,28 +14,28 @@ import PyFunction = require('./PyFunction');
 
 class PyFrame {
 
-  code: PyCodeObject;
+  private code: PyCodeObject;
   /*TODO?: trace: PyObject;
-   f_lineno: number;*/
+  private  f_lineno: number;*/
   /*TODO?: exception fields? f_exc_type: PyObject;
-   f_exc_value: PyObject;
-   f_exc_traceback: PyObject;*/
+  private  f_exc_value: PyObject;
+  private  f_exc_traceback: PyObject;*/
 
-  tstate: PyThreadState;
+  private tstate: PyThreadState;
 
-  last_i: number;
-  f_iblock: number;
+  private last_i: number;
+  private f_iblock: number;
 
-  f_localsplus: Array<any>; //locals+cells+free_var+valstack
+  private f_localsplus: Array<any>; //locals+cells+free_var+valstack
   //i.e. co_nlocals,co_cellvars,co_freevars,co_stacksize
 
-  valueStack: Stack<PyObject>; //Opcode arguments (if applicable)
-  blockStack: Stack<PyObject>; //TODO:PyTryBlock class
+  private valueStack: Stack<PyObject>; //Opcode arguments (if applicable)
+  private blockStack: Stack<PyObject>; //TODO:PyTryBlock class
 
   //use as associative arrays
-  locals: PyDict<PyObject, PyObject>; //local variables
-  globals: PyDict<PyObject, PyObject>; //global variables
-  builtins: PyDict<PyObject, PyObject>; //builtin variables
+  private locals: PyDict<PyObject, PyObject>; //local variables
+  private globals: PyDict<PyObject, PyObject>; //global variables
+  private builtins: PyDict<PyObject, PyObject>; //builtin variables
 
   constructor(code: PyCodeObject, tstate: PyThreadState){
     this.locals = new PyDict<PyObject, PyObject>();
@@ -231,7 +231,7 @@ class PyFrame {
 
   //90
   private STORE_NAME(fw: FileWrapper): void{
-    var index: number = this.getArg(fw);
+    var index: number = fw.getUInt16();
     var key: PyObject = this.code.getNames().getItem(index);
     var value: PyObject = this.valueStack.pop();
     this.locals.put(key, value);
@@ -243,14 +243,14 @@ class PyFrame {
 
   //100
   private LOAD_CONST(fw: FileWrapper): void{
-    var index: number = this.getArg(fw);
+    var index: number = fw.getUInt16();
     this.valueStack.push(this.code.getConst(index));
   }
 
   //101
   //Credit to Python Innards for Python-syntax version.
   private LOAD_NAME(fw: FileWrapper): void{
-    var index: number = this.getArg(fw);
+    var index: number = fw.getUInt16();
     var key: PyObject = this.code.getNames().getItem(index);
     var value: PyObject = this.locals.get(key);
     if(value === undefined){
@@ -278,9 +278,15 @@ class PyFrame {
   private STORE_FAST() {
   }
 
+  //131
+  private CALL_FUNCTION(fw: FileWrapper): void{
+    var posParams: number = fw.getUInt8();
+    var keyParams: number = fw.getUInt8();
+  }
+
   //132
-  private MAKE_FUNCTION(fw:FileWrapper):void {
-    var paramCnt: number = this.getArg(fw);
+  private MAKE_FUNCTION(fw: FileWrapper): void{
+    var paramCnt: number = fw.getUInt16();
     var codeobj: PyCodeObject = <PyCodeObject> this.valueStack.pop();
     var opargs: PyObject[] = new Array<PyObject>();
     for(var i: number = 0; i < paramCnt; i++){
@@ -291,10 +297,5 @@ class PyFrame {
       new PyTuple<PyObject>(opargs));
     this.valueStack.push(func);
   }
-
-  private getArg(fw:FileWrapper):number {
-    return fw.getUInt16();
-  }
-
 }
 export = PyFrame;
