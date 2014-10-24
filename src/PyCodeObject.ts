@@ -66,6 +66,9 @@ class PyCodeObject extends PyObject{
   getName(): PyString{
     return this.name;
   }
+  getNames(): PyTuple<PyObject>{
+    return this.names;
+  }
   setFilename(filename: PyString): void{
     this.filename = filename;
   }

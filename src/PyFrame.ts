@@ -231,8 +231,11 @@ class PyFrame {
 
   //90
   //TODO: should the stack be popped?
-  private STORE_NAME(name:any, value:any) {
-    this.locals[name] = value;
+  private STORE_NAME(fw: FileWrapper): void{
+    var index: number = this.getArg(fw);
+    var key: PyObject = this.code.getNames().getItem(index);
+    var value: PyObject = this.valueStack.pop();
+    this.locals.put(key, value);
   }
 
   //97
@@ -240,7 +243,7 @@ class PyFrame {
   }
 
   //100
-  private LOAD_CONST(fw:FileWrapper):void {
+  private LOAD_CONST(fw: FileWrapper): void{
     var index:number = this.getArg(fw);
     this.valueStack.push(this.code.getConst(index));
   }
