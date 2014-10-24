@@ -37,6 +37,9 @@ class PyFunction extends PyObject{
   getName(): PyString{
     return this.code.getName();
   }
+  getCode(): PyCodeObject{
+    return this.code;
+  }
 }
 
 export = PyFunction;

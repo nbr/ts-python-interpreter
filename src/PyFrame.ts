@@ -37,7 +37,8 @@ class PyFrame {
   private globals: PyDict<PyObject, PyObject>; //global variables
   private builtins: PyDict<PyObject, PyObject>; //builtin variables
 
-  constructor(code: PyCodeObject, tstate: PyThreadState){
+  constructor(code: PyCodeObject,
+      tstate: PyThreadState){
     this.locals = new PyDict<PyObject, PyObject>();
     this.globals = new PyDict<PyObject, PyObject>();
     this.builtins = new PyDict<PyObject, PyObject>();
@@ -49,17 +50,19 @@ class PyFrame {
   }
 
   //ceval.c : PyEval_EvalFrameEx
-  evalFrame(): void {
+  evalFrame(): PyObject{
     var opCodes:FileWrapper = this.code.getCode().getFileWrapper();
     opCodes.seek(0);
     while (opCodes.getOffset() < opCodes.getBufLength()) {
-      this.runOp(opCodes);
+      var returnValue: any = this.runOp(opCodes);
     }
     //TODO: Then get the next frame from threadstate
+    //the last executed opcode should be RETURN_VALUE
+    return <PyObject> returnValue;
   }
 
   //TODO: will fail on unimpl opcodes
-  private runOp(fw:FileWrapper):void {
+  private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
     console.log(currOpcode);
     if(this[enums.OpList[currOpcode]]) {
@@ -70,7 +73,7 @@ class PyFrame {
     }
   }
 
-  private rot(n:number):void {
+  private rot(n:number): void{
     var len:number = this.valueStack.getLength();
     var top:any = this.valueStack[len - 1];
     for (var i:number = 1; i < n; i++) {
@@ -79,7 +82,7 @@ class PyFrame {
     this.valueStack[len - n] = top;
   }
 
-  private isPyNum(type:enums.PyType):boolean {
+  private isPyNum(type:enums.PyType): boolean{
     return (enums.PyType.TYPE_INT <= type && type <= enums.PyType.TYPE_LONG);
   }
 
@@ -88,44 +91,44 @@ class PyFrame {
    runOp() instead of switch statements*/
 
   //0
-  private STOP_CODE(fw:FileWrapper):void {
+  private STOP_CODE(fw:FileWrapper): void{
     return;
   }
 
   //1
-  private POP_TOP(fw:FileWrapper):void {
+  private POP_TOP(fw:FileWrapper): void{
     this.valueStack.pop();
   }
 
   //2
-  private ROT_TWO(fw:FileWrapper):void {
+  private ROT_TWO(fw:FileWrapper): void{
     this.rot(2);
   }
 
   //3
-  private ROT_THREE(fw:FileWrapper):void {
+  private ROT_THREE(fw:FileWrapper): void{
     this.rot(3);
   }
 
   //4
-  private DUP_TOP(fw:FileWrapper):void {
+  private DUP_TOP(fw:FileWrapper): void{
     this.valueStack.push(this.valueStack[this.valueStack.getLength() - 1]);
   }
 
   //5
-  private ROT_FOUR(fw:FileWrapper):void {
+  private ROT_FOUR(fw:FileWrapper): void{
     this.rot(4);
   }
 
   //9
-  private NOP(fw:FileWrapper):void {
+  private NOP(fw:FileWrapper): void{
     return;
   }
 
   //10
   //TODO: redo using class methods
   /*
-  private UNARY_POSITIVE(fw:FileWrapper):void {
+  private UNARY_POSITIVE(fw:FileWrapper): void{
     var v:PyObject = this.valueStack.pop();
     if (!this.isPyNum(v.getType())) {
       v = new PyObject(enums.PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
@@ -137,7 +140,7 @@ class PyFrame {
   //11
   //TODO: redo using class methods
   /*
-  private UNARY_NEGATIVE(fw:FileWrapper):void {
+  private UNARY_NEGATIVE(fw:FileWrapper): void{
     var v:PyObject = this.valueStack.pop();
     if (!this.isPyNum(v.getType())) {
       v = new PyObject(enums.PyType.TYPE_ERROR, new PyError(PyErrorType.TypeError));
@@ -152,7 +155,7 @@ class PyFrame {
   //12
   //TODO: redo using class methods
   /*
-  private UNARY_NOT(fw:FileWrapper):void {
+  private UNARY_NOT(fw:FileWrapper): void{
     var v:PyObject = this.valueStack.pop();
     var b:boolean;
     switch (v.getType()) {
@@ -280,8 +283,29 @@ class PyFrame {
 
   //131
   private CALL_FUNCTION(fw: FileWrapper): void{
-    var posParams: number = fw.getUInt8();
-    var keyParams: number = fw.getUInt8();
+    var posParamCnt: number = fw.getUInt8();
+    var keyParamCnt: number = fw.getUInt8();
+    var keyParams: PyDict<PyObject, PyObject> = new PyDict<PyObject, PyObject>();
+    for(var i: number = 0; i < keyParamCnt; i++){
+      var key: PyObject = this.valueStack.pop();
+      var value: PyObject = this.valueStack.pop();
+      keyParams.put(key, value);
+    }
+    var posParamArray: PyObject[] = new Array<PyObject>();
+    for(i = 0; i < keyParamCnt; i++){
+      var param: PyObject = this.valueStack.pop();
+      posParamArray.unshift(param);
+    }
+    var posParams: PyTuple<PyObject> = new PyTuple<PyObject>(posParamArray);
+    //TODO: I don't know what to do with the parameters yet.
+    //We'll figure that out when we get to functions with parameters.
+    var func: PyFunction = <PyFunction> this.valueStack.pop();
+    var frame: PyFrame = new PyFrame(func.getCode(), this.tstate);
+    //TODO: Fill in frame fields using func
+    this.tstate.frameStackPush(frame);
+    var returnValue: PyObject = frame.evalFrame();
+    this.tstate.frameStackPop();
+    this.valueStack.push(returnValue);
   }
 
   //132
