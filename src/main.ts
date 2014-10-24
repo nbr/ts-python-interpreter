@@ -7,7 +7,7 @@ import PycFile = require('./PycFile');
 import PycParser = require('./PycParser');
 import PyInterpreterState = require('./PyInterpreterState');
 
-fs.readFile('./sample_pycs/helloworld.pyc', function afterRead(err, buffer: NodeBuffer){
+fs.readFile('./sample_pycs/helloworld2.pyc', function afterRead(err, buffer: NodeBuffer){
   if(err) { throw err; }
   var fw: FileWrapper = new FileWrapperNode(buffer);
   var pyc: PycFile = PycParser.parse(fw);
