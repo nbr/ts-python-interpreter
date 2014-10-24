@@ -15,6 +15,10 @@ class PyObject{
   getType(): enums.PyType{
     return this.type;
   }
+  __str__(): string{
+    //TODO: fix with Exception
+    throw "__str__ not implemented";
+  }
   /*
   getValue(): any{
     return this.value;

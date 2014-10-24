@@ -232,6 +232,11 @@ class PyFrame {
   }
   */
 
+  //71
+  private PRINT_ITEM(fw: FileWrapper): void{
+    var i: PyObject = this.valueStack.pop();
+    this.tstate.stdout(i.__str__());
+  }
   //90
   private STORE_NAME(fw: FileWrapper): void{
     var index: number = fw.getUInt16();

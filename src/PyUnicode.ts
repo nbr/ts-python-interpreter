@@ -10,6 +10,9 @@ class PyUnicode extends PyObject{
   getUnicode(): string{
     return this.u;
   }
+  __str__(): string{
+    return this.u;
+  }
 }
 
 export = PyUnicode;
