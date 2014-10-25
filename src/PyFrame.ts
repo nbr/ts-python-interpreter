@@ -26,8 +26,12 @@ class PyFrame {
   private last_i: number;
   private f_iblock: number;
 
-  private f_localsplus: Array<any>; //locals+cells+free_var+valstack
+  private f_localsplus: Array<PyObject>; //locals+cells+free_var+valstack
   //i.e. co_nlocals,co_cellvars,co_freevars,co_stacksize
+  //I could not find anything in frameobject.c that
+  //suggests f_localsplus has pointers to the valuestack
+  //In frameobject.h, it does say locals+stack
+  //on line 49
 
   private valueStack: Stack<PyObject>; //Opcode arguments (if applicable)
   private blockStack: Stack<PyObject>; //TODO:PyTryBlock class
@@ -45,10 +49,10 @@ class PyFrame {
     this.code = code;
     this.last_i = -1;
     this.tstate = tstate;
+    this.f_localsplus = new Array<PyObject>();
     this.valueStack = new Stack<PyObject>();
     this.blockStack = new Stack<PyObject>();
   }
-
   //ceval.c : PyEval_EvalFrameEx
   evalFrame(): PyObject{
     var opCodes:FileWrapper = this.code.getCode().getFileWrapper();
@@ -256,17 +260,14 @@ class PyFrame {
     var value: PyObject = this.valueStack.pop();
     this.locals.put(key, value);
   }
-
   //97
   private STORE_GLOBAL() {
   }
-
   //100
   private LOAD_CONST(fw: FileWrapper): void{
     var index: number = fw.getUInt16();
     this.valueStack.push(this.code.getConst(index));
   }
-
   //101
   //Credit to Python Innards for Python-syntax version.
   private LOAD_NAME(fw: FileWrapper): void{
@@ -284,18 +285,29 @@ class PyFrame {
     }
     this.valueStack.push(value);
   }
-
   //116
   private LOAD_GLOBAL() {
   }
-
   //124
   //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
   private LOAD_FAST() {
   }
-
   //125
-  private STORE_FAST() {
+  private STORE_FAST(fw: FileWrapper): void{
+    //lines 815-834 of frameobject.c has some info
+    //about it views f_localsplus the call to the func
+    //is dict_to_map(co->co_varnames, j, f_locals, f_localsplus, 0, clear);
+    //edited from line 946
+    var value: PyObject = this.valueStack.pop();
+    var index: number = fw.getUInt16();
+    //console.log('value='+JSON.stringify(value));
+    //console.log('index='+index);
+    //console.log('co_varnames='+JSON.stringify(this.code.getVarnames()));
+    //this is my best guess. I'm not sure if
+    //f_localsplus should store the PyObject or
+    //point to another data structure that actually
+    //stores the PyObject
+    this.f_localsplus[index] = value;
   }
 
   //131

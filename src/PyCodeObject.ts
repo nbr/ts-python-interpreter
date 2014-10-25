@@ -84,6 +84,9 @@ class PyCodeObject extends PyObject{
   getConstsSize(): number{
     return this.consts.getLength();
   }
+  getVarnames(): PyTuple<PyObject>{
+    return this.varnames;
+  }
 }
 interface CodeOffsetToLineNoMap{
   [index: number]: number;

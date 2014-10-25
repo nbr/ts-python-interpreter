@@ -54,7 +54,7 @@ export enum OpList {
   STORE_NAME = 90,
   LOAD_CONST = 100,
   LOAD_NAME = 101,
-  STORE_FAST = 125, //in progress PP
+  STORE_FAST = 125,
   CALL_FUNCTION = 131,
   MAKE_FUNCTION = 132
 }

@@ -14,7 +14,7 @@ class PycFile{
     this.codeobj = codeobj;
   }
   stringify(): string{
-    return JSON.stringify(this);
+    return JSON.stringify(this, null, 2);
   }
   getCodeobj(): PyCodeObject{
     return this.codeobj;
