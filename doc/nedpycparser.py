@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#http://nedbatchelder.com/blog/200804/the_structure_of_pyc_files.html
 
 import dis, marshal, struct, sys, time, types
 
