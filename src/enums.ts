@@ -47,6 +47,8 @@ export enum OpList {
   //UNARY_POSITIVE = 10,
   //UNARY_NEGATIVE = 11,
   //UNARY_NOT = 12,
+  BINARY_ADD = 23, //in progress PP
+  PRINT_ITEM = 71,
   PRINT_ITEM = 71,
   PRINT_NEWLINE = 72,
   PRINT_NEWLINE_TO = 73,
@@ -54,7 +56,7 @@ export enum OpList {
   STORE_NAME = 90,
   LOAD_CONST = 100,
   LOAD_NAME = 101,
-  LOAD_FAST = 124, //in progress PP
+  LOAD_FAST = 124,
   STORE_FAST = 125,
   CALL_FUNCTION = 131,
   MAKE_FUNCTION = 132

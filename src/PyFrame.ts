@@ -289,8 +289,9 @@ class PyFrame {
   private LOAD_GLOBAL() {
   }
   //124
-  //TODO: Bypass scope optimization and simply call (LOAD,STORE)_NAME?
-  private LOAD_FAST() {
+  private LOAD_FAST(fw: FileWrapper): void{
+    var index: number = fw.getUInt16();
+    this.valueStack.push(this.f_localsplus[index]);
   }
   //125
   private STORE_FAST(fw: FileWrapper): void{
