@@ -241,6 +241,10 @@ class PyFrame {
   private PRINT_NEWLINE(fw: FileWrapper): void{
     this.tstate.stdout('\n');
   }
+  //73
+  private PRINT_NEWLINE_TO(fw: FileWrapper): void{
+    this.PRINT_NEWLINE();
+  }
   //83
   private RETURN_VALUE(fw: FileWrapper): PyObject{
     return this.valueStack.pop();
