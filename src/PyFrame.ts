@@ -64,11 +64,11 @@ class PyFrame {
   //TODO: will fail on unimpl opcodes
   private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
-    console.log(currOpcode);
     if(this[enums.OpList[currOpcode]]) {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
+      console.log(currOpcode);
       throw "Missing impl of opcode";
     }
   }
@@ -236,6 +236,14 @@ class PyFrame {
   private PRINT_ITEM(fw: FileWrapper): void{
     var i: PyObject = this.valueStack.pop();
     this.tstate.stdout(i.__str__());
+  }
+  //72
+  private PRINT_NEWLINE(fw: FileWrapper): void{
+    this.tstate.stdout('\n');
+  }
+  //83
+  private RETURN_VALUE(fw: FileWrapper): PyObject{
+    return this.valueStack.pop();
   }
   //90
   private STORE_NAME(fw: FileWrapper): void{

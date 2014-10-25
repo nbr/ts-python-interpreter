@@ -4,7 +4,7 @@ class StdoutConsole implements Stdout{
   constructor(){
   }
   write(s: string): void{
-    console.log(s);
+    process.stdout.write(s);
   }
 }
 

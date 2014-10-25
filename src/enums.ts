@@ -48,6 +48,8 @@ export enum OpList {
   //UNARY_NEGATIVE = 11,
   //UNARY_NOT = 12,
   PRINT_ITEM = 71,
+  PRINT_NEWLINE = 72,
+  RETURN_VALUE = 83,
   STORE_NAME = 90,
   LOAD_CONST = 100,
   LOAD_NAME = 101,
