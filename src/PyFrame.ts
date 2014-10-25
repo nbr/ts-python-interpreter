@@ -243,7 +243,7 @@ class PyFrame {
   }
   //73
   private PRINT_NEWLINE_TO(fw: FileWrapper): void{
-    this.PRINT_NEWLINE();
+    this.PRINT_NEWLINE(fw);
   }
   //83
   private RETURN_VALUE(fw: FileWrapper): PyObject{
