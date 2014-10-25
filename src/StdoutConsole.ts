@@ -4,7 +4,12 @@ class StdoutConsole implements Stdout{
   constructor(){
   }
   write(s: string): void{
-    console.log(s);
+    if(s == null){
+      process.stdout.write('\n');
+    }
+    else{
+      process.stdout.write(s+'\n');
+    }
   }
 }
 

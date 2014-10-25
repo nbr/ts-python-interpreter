@@ -237,6 +237,17 @@ class PyFrame {
     var i: PyObject = this.valueStack.pop();
     this.tstate.stdout(i.__str__());
   }
+
+  //72
+  private PRINT_NEWLINE(): void{
+    this.tstate.stdout(null);
+  }
+
+  //73
+  private PRINT_NEWLINE_TO(): void{
+    this.PRINT_NEWLINE();
+  }
+
   //90
   private STORE_NAME(fw: FileWrapper): void{
     var index: number = fw.getUInt16();
