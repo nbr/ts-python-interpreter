@@ -16,7 +16,7 @@ class PyList<T> extends PyObject{
   __str__(): string{
     var s = "[";
     for(var i=0; i < this.array.length; i++){
-      s += this.getItem(i).__str__();
+      s += "" + this.getItem(i);
       if(i!=this.array.length-1){ s+=","; }
     }
     s += "]"

@@ -43,7 +43,7 @@ class PyDict<K, V>{
     }
     for(var i=0; i < this.keys.length; i++){
       s += "(";
-      s += this.keys[i].__str__();
+      s += "" + this.keys[i];
       s += ": ";
       s += this.get(this.keys[i]);
       if(i!=this.keys.length-1){ s += "),"; }
