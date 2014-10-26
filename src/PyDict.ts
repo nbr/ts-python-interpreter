@@ -35,6 +35,23 @@ class PyDict<K, V>{
   private getKeyIndex(key: K): number{
     return this.keys.indexOf(key);
   }
+
+  __str__(): string{
+    var s = "{";
+    if(this.keys.length != this.values.length){
+      throw "uneven dict";
+    }
+    for(var i=0; i < this.keys.length; i++){
+      s += "(";
+      s += this.keys[i].__str__();
+      s += ": ";
+      s += this.get(this.keys[i]);
+      if(i!=this.keys.length-1){ s += "),"; }
+      else{ s += ")"; }
+    }
+    s += "}";
+    return s;
+  }
 }
 
 export = PyDict;

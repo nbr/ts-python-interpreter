@@ -10,6 +10,9 @@ class PyBinaryFloat extends PyObject{
   getBinaryFloat(): number{
     return this.n;
   }
+  __str__(): string{
+    return this.n.toString();
+  }
 }
 
 export = PyBinaryFloat;

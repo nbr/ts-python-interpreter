@@ -299,7 +299,6 @@ class PyFrame {
     //about it views f_localsplus the call to the func
     //is dict_to_map(co->co_varnames, j, f_locals, f_localsplus, 0, clear);
     //edited from line 946
-//    console.log("STORE_FAST");
     var value: PyObject = this.valueStack.pop();
     var index: number = fw.getUInt16();
     //console.log('value='+JSON.stringify(value));

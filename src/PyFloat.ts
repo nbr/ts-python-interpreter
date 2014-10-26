@@ -10,6 +10,9 @@ class PyFloat extends PyObject{
   getFloat(): number{
     return this.n;
   }
+  __str__(): string{
+    return this.n.toString();
+  }
 }
 
 export = PyFloat;
