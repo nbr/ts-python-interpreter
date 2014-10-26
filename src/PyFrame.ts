@@ -322,7 +322,7 @@ class PyFrame {
       keyParams.put(key, value);
     }
     var posParamArray: PyObject[] = new Array<PyObject>();
-    for(i = 0; i < keyParamCnt; i++){
+    for(i = 0; i < posParamCnt; i++){
       var param: PyObject = this.valueStack.pop();
       posParamArray.unshift(param);
     }
