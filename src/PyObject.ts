@@ -1,4 +1,5 @@
 import enums = require('./enums');
+import Exceptions = require('./Exceptions');
 
 class PyObject{
   private type: enums.PyType;
@@ -16,8 +17,10 @@ class PyObject{
     return this.type;
   }
   __str__(): string{
-    //TODO: fix with Exception
-    throw "__str__ not implemented";
+    throw new Exceptions.Exception("__str__ not implemented");
+  }
+  __add__(other: PyObject): PyObject{
+    throw new Exceptions.Exception("__add__ not implemented");
   }
   /*
   getValue(): any{
