@@ -1,5 +1,5 @@
 def phw(a,b):
-    if("abc" == "abc"):
+    if("abc" == "abcd"):
 	print b
     if(b > 0):
         print b
