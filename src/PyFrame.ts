@@ -11,6 +11,8 @@ import Stack = require('./Stack');
 import PyDict = require('./PyDict');
 import PyTuple = require('./PyTuple');
 import PyFunction = require('./PyFunction');
+import PyTrue = require('./PyTrue');
+import PyFalse = require('./PyFalse');
 
 class PyFrame {
 
@@ -284,6 +286,19 @@ class PyFrame {
       throw new Exceptions.Exception(JSON.stringify(key) + " not defined");
     }
     this.valueStack.push(value);
+  }
+
+  //107
+  private COMPARE_OP(fw: FileWrapper): void {
+    var cmpidx = fw.getUInt16();
+    var b: PyObject = this.valueStack.pop();
+    var a: PyObject = this.valueStack.pop();
+    if(a.__cmp__(cmpidx,b)){
+      this.valueStack.push(new PyTrue());
+    }
+    else{
+      this.valueStack.push(new PyFalse());
+    }
   }
   //116
   private LOAD_GLOBAL() {
