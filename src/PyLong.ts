@@ -10,6 +10,9 @@ class PyLong extends PyObject{
   getLong(): number{
     return this.n;
   }
+  __str__(): string{
+    return this.n.toString();
+  }
 }
 
 export = PyLong;

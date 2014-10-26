@@ -50,6 +50,7 @@ class PyFrame {
     this.last_i = -1;
     this.tstate = tstate;
     this.f_localsplus = new Array<PyObject>();
+
     this.valueStack = new Stack<PyObject>();
     this.blockStack = new Stack<PyObject>();
   }
@@ -72,7 +73,6 @@ class PyFrame {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
-      console.log(currOpcode);
       throw "Missing impl of opcode";
     }
   }
@@ -327,10 +327,10 @@ class PyFrame {
       posParamArray.unshift(param);
     }
     var posParams: PyTuple<PyObject> = new PyTuple<PyObject>(posParamArray);
-    //TODO: I don't know what to do with the parameters yet.
-    //We'll figure that out when we get to functions with parameters.
     var func: PyFunction = <PyFunction> this.valueStack.pop();
     var frame: PyFrame = new PyFrame(func.getCode(), this.tstate);
+    //TODO: This should be a temporary hack
+    frame.f_localsplus = posParamArray;
     //TODO: Fill in frame fields using func
     this.tstate.frameStackPush(frame);
     var returnValue: PyObject = frame.evalFrame();
@@ -343,7 +343,7 @@ class PyFrame {
     var paramCnt: number = fw.getUInt16();
     var codeobj: PyCodeObject = <PyCodeObject> this.valueStack.pop();
     var opargs: PyObject[] = new Array<PyObject>();
-    for(var i: number = 0; i < paramCnt; i++){
+    for(var i: number = 0; i < paramCnt; i++) {
       opargs.push(this.valueStack.pop());
     }
     var func: PyFunction = new PyFunction(codeobj,

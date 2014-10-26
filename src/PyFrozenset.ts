@@ -13,6 +13,16 @@ class PyFrozenset<T> extends PyObject{
   getLength(): number{
     return this.array.length;
   }
+
+  __str__(): string{
+    var s = "(";
+    for(var i=0; i < this.array.length; i++){
+      s += "" + this.getItem(i);
+      if(i!=this.array.length-1){ s+=","; }
+    }
+    s += ")";
+    return s;
+  }
 }
 
 export = PyFrozenset;

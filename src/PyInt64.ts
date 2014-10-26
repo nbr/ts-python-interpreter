@@ -11,6 +11,10 @@ class PyInt64 extends PyObject{
   getInt64(): gLong{
     return this.n;
   }
+
+  __str__(): string{
+    return this.n.toString();
+  }
 }
 
 export = PyInt64;
