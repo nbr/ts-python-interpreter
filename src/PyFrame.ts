@@ -50,6 +50,7 @@ class PyFrame {
     this.last_i = -1;
     this.tstate = tstate;
     this.f_localsplus = new Array<PyObject>();
+
     this.valueStack = new Stack<PyObject>();
     this.blockStack = new Stack<PyObject>();
   }
@@ -72,7 +73,6 @@ class PyFrame {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
-      console.log(currOpcode);
       throw "Missing impl of opcode";
     }
   }
@@ -299,6 +299,7 @@ class PyFrame {
     //about it views f_localsplus the call to the func
     //is dict_to_map(co->co_varnames, j, f_locals, f_localsplus, 0, clear);
     //edited from line 946
+//    console.log("STORE_FAST");
     var value: PyObject = this.valueStack.pop();
     var index: number = fw.getUInt16();
     //console.log('value='+JSON.stringify(value));
@@ -322,15 +323,15 @@ class PyFrame {
       keyParams.put(key, value);
     }
     var posParamArray: PyObject[] = new Array<PyObject>();
-    for(i = 0; i < keyParamCnt; i++){
+    for(i = 0; i < posParamCnt; i++){
       var param: PyObject = this.valueStack.pop();
       posParamArray.unshift(param);
     }
     var posParams: PyTuple<PyObject> = new PyTuple<PyObject>(posParamArray);
-    //TODO: I don't know what to do with the parameters yet.
-    //We'll figure that out when we get to functions with parameters.
     var func: PyFunction = <PyFunction> this.valueStack.pop();
     var frame: PyFrame = new PyFrame(func.getCode(), this.tstate);
+    //TODO: This should be a temporary hack
+    frame.f_localsplus = posParamArray;
     //TODO: Fill in frame fields using func
     this.tstate.frameStackPush(frame);
     var returnValue: PyObject = frame.evalFrame();
@@ -343,7 +344,7 @@ class PyFrame {
     var paramCnt: number = fw.getUInt16();
     var codeobj: PyCodeObject = <PyCodeObject> this.valueStack.pop();
     var opargs: PyObject[] = new Array<PyObject>();
-    for(var i: number = 0; i < paramCnt; i++){
+    for(var i: number = 0; i < paramCnt; i++) {
       opargs.push(this.valueStack.pop());
     }
     var func: PyFunction = new PyFunction(codeobj,
