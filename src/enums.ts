@@ -55,8 +55,20 @@ export enum OpList {
   STORE_NAME = 90,
   LOAD_CONST = 100,
   LOAD_NAME = 101,
+  COMPARE_OP = 107,
   LOAD_FAST = 124,
   STORE_FAST = 125,
   CALL_FUNCTION = 131,
   MAKE_FUNCTION = 132
+}
+
+export enum Cmp {
+  PyCmp_LT = 0,
+  PyCmp_LE = 1,
+  PyCmp_EQ = 2,
+  PyCmp_NE = 3,
+  PyCmp_GT = 4,
+  PyCmp_GE = 5,
+  PyCmp_IS = 8,
+  PyCmp_IS_NOT = 9
 }

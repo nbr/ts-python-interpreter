@@ -22,6 +22,32 @@ class PyObject{
   __add__(other: PyObject): PyObject{
     throw new Exceptions.Exception("__add__ not implemented");
   }
+
+  getValue(): any{
+    //TODO: fix with Exception
+    throw "getValue not implemented";
+  }
+  __cmp__(cmpidx: number, comparee: PyObject): boolean{
+    //TODO: fix with Exception
+    throw "cmp not implemented";
+  }
+
+//  __cmp__(cmpidx: number, comparee: PyObject): boolean{
+//    var type = enums.PyType[this.getType()];
+//    var exp = enums.Cmp[cmpidx];
+//    if(type != enums.PyType[comparee.getType()]){ throw "type mismatch"; }
+//
+////    if(type == "TYPE_INT"){
+////     return this.int_compare(exp,this.getValue(),comparee.getValue());
+////    }
+////    else if(type == "TYPE_STRING"){
+////      return this.string_compare(exp,this.getValue(),comparee.getValue());
+////    }
+////    else{
+////      throw "not defined for comparison yet";
+////    }
+//  }
+
   /*
   getValue(): any{
     return this.value;
