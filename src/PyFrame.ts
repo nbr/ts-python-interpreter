@@ -61,6 +61,7 @@ class PyFrame {
     var opCodes:FileWrapper = this.code.getCode().getFileWrapper();
     opCodes.seek(0);
     while (opCodes.getOffset() < opCodes.getBufLength()) {
+      console.log(opCodes.getOffset());
       var returnValue: any = this.runOp(opCodes);
     }
     //TODO: Then get the next frame from threadstate
@@ -71,6 +72,12 @@ class PyFrame {
   //TODO: will fail on unimpl opcodes
   private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
+//    console.log("-");
+//    console.log("currOpC");
+//    console.log(currOpcode);
+//    console.log("offs");
+//    console.log(fw.getOffset() - 1);
+    this.last_i = fw.getOffset() - 1;
     if(this[enums.OpList[currOpcode]]) {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
@@ -300,6 +307,16 @@ class PyFrame {
       this.valueStack.push(new PyFalse());
     }
   }
+
+  //114
+  private POP_JUMP_IF_FALSE(fw: FileWrapper): void{
+    var value: boolean = this.valueStack.pop().getValue();
+    var jump: number = fw.getUInt16();
+    if(value == true){
+      fw.seek(jump);
+    }
+  }
+
   //116
   private LOAD_GLOBAL() {
   }
