@@ -15,6 +15,7 @@ import PyFunction = require('./PyFunction');
 import PyTrue = require('./PyTrue');
 import PyFalse = require('./PyFalse');
 import PyString = require('./PyString');
+import PyTryBlock = require ('./PyTryBlock');
 
 class PyFrame {
 
@@ -25,10 +26,11 @@ class PyFrame {
   private  f_exc_value: PyObject;
   private  f_exc_traceback: PyObject;*/
 
+  private CO_MAXBLOCKS;
+
   private tstate: PyThreadState;
 
   private last_i: number;
-  private f_iblock: number;
 
   private f_localsplus: Array<PyObject>; //locals+cells+free_var+valstack
   //i.e. co_nlocals,co_cellvars,co_freevars,co_stacksize
@@ -38,7 +40,12 @@ class PyFrame {
   //on line 49
 
   private valueStack: Stack<PyObject>; //Opcode arguments (if applicable)
-  private blockStack: Stack<PyObject>; //TODO:PyTryBlock class
+
+  private blockStack: Stack<PyTryBlock>;
+
+  //private iblock: number; //an index into the block stack
+  //This is equivalent to blockStack.getLength() and unnecessary
+  //likewise for f_stacktop, which is just valueStack.length()
 
   //use as associative arrays
   private locals: PyDict<PyObject, PyObject>; //local variables
@@ -59,7 +66,9 @@ class PyFrame {
     this.f_localsplus = new Array<PyObject>();
 
     this.valueStack = new Stack<PyObject>();
-    this.blockStack = new Stack<PyObject>();
+    this.blockStack = new Stack<PyTryBlock>();
+
+    this.CO_MAXBLOCKS = 100; //TODO: temporary
   }
   //ceval.c : PyEval_EvalFrameEx
   evalFrame(): PyObject{
@@ -76,7 +85,8 @@ class PyFrame {
   //TODO: will fail on unimpl opcodes
   private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
-    this.last_i = fw.getOffset();
+    console.log(currOpcode);
+    //this.last_i = fw.getOffset();
     if(this[enums.OpList[currOpcode]]) {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
@@ -84,6 +94,7 @@ class PyFrame {
       this.tstate.stdout('opcode ' + currOpcode + ' = ' + enums.OpList[currOpcode]);
       throw new Exceptions.Exception("Opcode not impl");
     }
+    this.last_i = fw.getOffset();
   }
 
   private rot(n:number): void{
@@ -97,6 +108,20 @@ class PyFrame {
 
   private isPyNum(type:enums.PyType): boolean{
     return (enums.PyType.TYPE_INT <= type && type <= enums.PyType.TYPE_LONG);
+  }
+
+  private blockSetup(f: PyFrame, type, handler: number, level: number): void{
+    if(this.blockStack.getLength() >= this.CO_MAXBLOCKS){
+      throw "block stack overflow";
+    }
+    var tryBlock = new PyTryBlock(type,handler,level);
+    this.blockStack.push(tryBlock);
+  }
+
+  private blockPop(f: PyFrame): PyTryBlock{
+    var tryBlock: PyTryBlock;
+    tryBlock = f.blockStack.pop();
+    return tryBlock;
   }
 
   /*Opcodes
@@ -274,12 +299,20 @@ class PyFrame {
   private RETURN_VALUE(fw: FileWrapper): PyObject{
     return this.valueStack.pop();
   }
+  //87
+  private BLOCK_POP(fw: FileWrapper): void{
+    this.blockPop(this);
+  }
   //90
   private STORE_NAME(fw: FileWrapper): void{
     var index: number = fw.getUInt16();
     var key: PyObject = this.code.getNames().getItem(index);
     var value: PyObject = this.valueStack.pop();
     this.locals.put(key, value);
+  }
+  //93
+  private FOR_ITER(fw: FileWrapper): void{
+
   }
   //97
   private STORE_GLOBAL() {
@@ -313,6 +346,22 @@ class PyFrame {
     this.valueStack.push(value);
   }
 
+  //102
+  private BUILD_TUPLE(fw: FileWrapper): void{
+
+  }
+  //103
+  private BUILD_LIST(fw: FileWrapper): void{
+
+  }
+  //104
+  private BUILD_SET(fw: FileWrapper): void{
+
+  }
+  //105
+  private BUILD_MAP(fw: FileWrapper): void{
+
+  }
   //107
   private COMPARE_OP(fw: FileWrapper): void {
     var cmpidx = fw.getUInt16();
@@ -325,13 +374,26 @@ class PyFrame {
       this.valueStack.push(new PyFalse());
     }
   }
+  //108
+  private IMPORT_NAME(fw: FileWrapper): void{
 
+  }
+  //109
+  private IMPORT_FROM(fw: FileWrapper): void{
+
+  }
   //110
   private JUMP_FORWARD(fw: FileWrapper): void{
     var jump: number = fw.getUInt16();
     fw.seek(fw.getOffset() + jump);
   }
-
+  //113
+  private JUMP_ABSOLUTE(fw: FileWrapper): void{
+    var jumpto: number = fw.getUInt16();
+    console.log("jump");
+    console.log(jumpto);
+    fw.seek(jumpto);
+  }
   //114
   private POP_JUMP_IF_FALSE(fw: FileWrapper): void{
     var value: boolean = this.valueStack.pop().getValue();
@@ -340,7 +402,6 @@ class PyFrame {
       fw.seek(jumpto);
     }
   }
-
   //116
   private LOAD_GLOBAL(fw: FileWrapper): void{
     var index: number = fw.getUInt16();
@@ -360,6 +421,27 @@ class PyFrame {
     }
     this.valueStack.push(value);
   }
+  //119
+  private CONTINUE_LOOP(fw: FileWrapper): void{
+
+  }
+  //120 **
+  private SETUP_LOOP(fw: FileWrapper): void{
+    var offset = fw.getUInt16();
+    console.log(".");
+    console.log(offset);
+    console.log(".");
+    this.blockSetup(this,PyFrame,this.last_i + offset,this.valueStack.getLength());
+  }
+  //121
+  private SETUP_EXCEPT(fw: FileWrapper): void{
+    this.blockSetup(this,PyFrame,this.last_i + fw.getUInt16(),this.valueStack.getLength());
+  }
+  //122
+  private SETUP_FINALLY(fw: FileWrapper): void{
+    this.blockSetup(this,PyFrame,this.last_i + fw.getUInt16(),this.valueStack.getLength());
+  }
+
   //124
   private LOAD_FAST(fw: FileWrapper): void{
     var index: number = fw.getUInt16();
