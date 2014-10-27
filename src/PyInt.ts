@@ -75,7 +75,7 @@ class PyInt extends PyObject{
       default:
         throw new Exceptions.Exception("__radd__ param not TYPE_INT");
     }
-    var result: number = this.n + leftN;
+    var result: number = leftN + this.n;
     return new PyInt(result);
   }
 }

@@ -1,5 +1,6 @@
 //TODO: optimize imports
 import FileWrapper = require('./FileWrapper');
+import FileWrapperFactory = require('./FileWrapperFactory');
 import PyError = require('./PyError');
 import PyErrorType = require('./PyErrorType');
 import PyObject = require('./PyObject');
@@ -13,6 +14,7 @@ import PyTuple = require('./PyTuple');
 import PyFunction = require('./PyFunction');
 import PyTrue = require('./PyTrue');
 import PyFalse = require('./PyFalse');
+import PyString = require('./PyString');
 
 class PyFrame {
 
@@ -48,6 +50,9 @@ class PyFrame {
     this.locals = new PyDict<PyObject, PyObject>();
     this.globals = new PyDict<PyObject, PyObject>();
     this.builtins = new PyDict<PyObject, PyObject>();
+    //guess what's in builtins and stick it
+    this.builtins.put(new PyString(FileWrapperFactory.fromString('True')), new PyTrue);
+    this.builtins.put(new PyString(FileWrapperFactory.fromString('False')), new PyFalse);
     this.code = code;
     this.last_i = -1;
     this.tstate = tstate;
@@ -297,7 +302,13 @@ class PyFrame {
       value = this.builtins.get(key);
     }
     if(value === undefined){
-      throw new Exceptions.Exception(JSON.stringify(key) + " not defined");
+      try{
+        this.tstate.stdout('key=' + key.__str__());
+      }
+      catch(e){
+        this.tstate.stdout('key=' + JSON.stringify(key));
+      }
+      throw new Exceptions.Exception('LOAD_NAME key not defined');
     }
     this.valueStack.push(value);
   }
@@ -339,7 +350,13 @@ class PyFrame {
       value = this.builtins.get(key);
     }
     if(value === undefined){
-      throw new Exceptions.Exception(JSON.stringify(key) + " not defined");
+      try{
+        this.tstate.stdout('key=' + key.__str__());
+      }
+      catch(e){
+        this.tstate.stdout('key=' + JSON.stringify(key));
+      }
+      throw new Exceptions.Exception('LOAD_GLOBAL key not defined');
     }
     this.valueStack.push(value);
   }
