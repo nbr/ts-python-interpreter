@@ -25,7 +25,7 @@ class PyString extends PyObject{
   __cmp__(cmpidx: number, comparee: PyObject): boolean{
     var type: string = enums.PyType[this.getType()];
     if(type !== enums.PyType[comparee.getType()]){ throw "type mismatch"; }
-    var a = this.getValue();
+    var a = this.getValue(); // fw buffer length is -1
     var b = comparee.getValue();
     if (cmpidx === enums.Cmp.PyCmp_EQ || cmpidx === enums.Cmp.PyCmp_IS) {
       return a === b;

@@ -10,12 +10,14 @@ import Exceptions = require('./Exceptions');
 import PyThreadState = require('./PyThreadState');
 import Stack = require('./Stack');
 import PyDict = require('./PyDict');
+import PyList = require ('./PyList');
 import PyTuple = require('./PyTuple');
 import PyFunction = require('./PyFunction');
 import PyTrue = require('./PyTrue');
 import PyFalse = require('./PyFalse');
 import PyString = require('./PyString');
 import PyTryBlock = require ('./PyTryBlock');
+import Iterator = require ('./Iterator');
 
 class PyFrame {
 
@@ -114,7 +116,7 @@ class PyFrame {
     if(this.blockStack.getLength() >= this.CO_MAXBLOCKS){
       throw "block stack overflow";
     }
-    console.log(this.blockStack.getLength());
+    //console.log(this.blockStack.getLength());
     var tryBlock = new PyTryBlock(type,handler,level);
     this.blockStack.push(tryBlock);
   }
@@ -285,15 +287,20 @@ class PyFrame {
   }
   //68
   private GET_ITER(fw: FileWrapper): void{
-
+    //Create an iterator object from the object that's on the stack and return the iterator class encapsulating that object.
+    var obj = this.valueStack.pop();
+    var itt = new Iterator(obj);
+    this.valueStack.push(itt);
   }
   //71
   private PRINT_ITEM(fw: FileWrapper): void{
+//    console.log("PRINT_ITEM");
     var i: PyObject = this.valueStack.pop();
     this.tstate.stdout(i.__str__());
   }
   //72
   private PRINT_NEWLINE(fw: FileWrapper): void{
+//    console.log("PRINT_NEWLINE");
     this.tstate.stdout('\n');
   }
   //73
@@ -317,7 +324,16 @@ class PyFrame {
   }
   //93
   private FOR_ITER(fw: FileWrapper): void{
-
+    var iter = <Iterator<PyObject>> this.valueStack.pop();
+    var jump: number = fw.getUInt16();
+    if(iter.reverseHasNext()){
+      var item = iter.reverseNext();
+      this.valueStack.push(iter);
+      this.valueStack.push(item);
+    }
+    else{
+      fw.seek(fw.getOffset() + jump);
+    }
   }
   //97
   private STORE_GLOBAL() {
@@ -357,7 +373,13 @@ class PyFrame {
   }
   //103
   private BUILD_LIST(fw: FileWrapper): void{
-
+    var listSize = fw.getUInt16();
+    var pyList = new PyList(new Array<PyObject>());
+    for(var i = listSize; i>0; i--){
+      var elt = this.valueStack.pop();
+      pyList.array.push(elt);
+    }
+    this.valueStack.push(pyList);
   }
   //104
   private BUILD_SET(fw: FileWrapper): void{

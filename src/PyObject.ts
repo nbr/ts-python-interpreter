@@ -3,6 +3,7 @@ import Exceptions = require('./Exceptions');
 
 class PyObject{
   private type: enums.PyType;
+
   //private value: any;
   /*
   constructor(type: enums.PyType, value: any){
@@ -35,27 +36,10 @@ class PyObject{
     throw "cmp not implemented";
   }
 
-//  __cmp__(cmpidx: number, comparee: PyObject): boolean{
-//    var type = enums.PyType[this.getType()];
-//    var exp = enums.Cmp[cmpidx];
-//    if(type != enums.PyType[comparee.getType()]){ throw "type mismatch"; }
-//
-////    if(type == "TYPE_INT"){
-////     return this.int_compare(exp,this.getValue(),comparee.getValue());
-////    }
-////    else if(type == "TYPE_STRING"){
-////      return this.string_compare(exp,this.getValue(),comparee.getValue());
-////    }
-////    else{
-////      throw "not defined for comparison yet";
-////    }
-//  }
-
-  /*
-  getValue(): any{
-    return this.value;
+  getArray(): any{
+    throw new Exceptions.Exception("getArray not implemented");
   }
-  */
+
 }
 
 export = PyObject;
