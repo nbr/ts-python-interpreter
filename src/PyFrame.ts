@@ -85,7 +85,7 @@ class PyFrame {
   //TODO: will fail on unimpl opcodes
   private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
-    console.log(currOpcode);
+    //console.log(currOpcode);
     //this.last_i = fw.getOffset();
     if(this[enums.OpList[currOpcode]]) {
       this[enums.OpList[currOpcode]].call(this, fw);
@@ -114,6 +114,7 @@ class PyFrame {
     if(this.blockStack.getLength() >= this.CO_MAXBLOCKS){
       throw "block stack overflow";
     }
+    console.log(this.blockStack.getLength());
     var tryBlock = new PyTryBlock(type,handler,level);
     this.blockStack.push(tryBlock);
   }
@@ -282,6 +283,10 @@ class PyFrame {
     }
     this.valueStack.push(result);
   }
+  //68
+  private GET_ITER(fw: FileWrapper): void{
+
+  }
   //71
   private PRINT_ITEM(fw: FileWrapper): void{
     var i: PyObject = this.valueStack.pop();
@@ -300,7 +305,7 @@ class PyFrame {
     return this.valueStack.pop();
   }
   //87
-  private BLOCK_POP(fw: FileWrapper): void{
+  private POP_BLOCK(fw: FileWrapper): void{
     this.blockPop(this);
   }
   //90
@@ -390,8 +395,6 @@ class PyFrame {
   //113
   private JUMP_ABSOLUTE(fw: FileWrapper): void{
     var jumpto: number = fw.getUInt16();
-    console.log("jump");
-    console.log(jumpto);
     fw.seek(jumpto);
   }
   //114
@@ -425,12 +428,9 @@ class PyFrame {
   private CONTINUE_LOOP(fw: FileWrapper): void{
 
   }
-  //120 **
+  //120
   private SETUP_LOOP(fw: FileWrapper): void{
     var offset = fw.getUInt16();
-    console.log(".");
-    console.log(offset);
-    console.log(".");
     this.blockSetup(this,PyFrame,this.last_i + offset,this.valueStack.getLength());
   }
   //121
