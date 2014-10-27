@@ -18,45 +18,45 @@ class PyInt64 extends PyObject{
     return this.n.toString();
   }
   __add__(right: PyObject): PyInt64{
-    var rightType: enums.PyType = right.getType();
     var rightN: gLong;
-    switch (rightType) {
-      case enums.PyType.TYPE_INT64:
-        rightN = (<PyInt64> right).getValue();
-        break;
-      case enums.PyType.TYPE_INT:
-        rightN = gLong.fromInt((<PyInt> right).getValue());
-        break;
-      case enums.PyType.TYPE_TRUE:
-        rightN = gLong.fromInt(1);
-        break;
-      case enums.PyType.TYPE_FALSE:
-        rightN = gLong.fromInt(0);
-        break;
-      default:
-        throw new Exceptions.Exception("__add__ param not TYPE_INT");
+    if(right.getType() === this.getType()){
+      rightN = (<PyInt64> right).getInt64();
+    }else{
+      try{
+        rightN = this.coercion(right);
+      }catch(e){
+        throw new Exceptions.Exception("TYPE_INT64 __add__ unsuported parameter type");
+      }
     }
     var result: gLong = this.n.add(rightN);
     return new PyInt64(result);
   }
   __radd__(left: PyObject): PyInt64{
-    var leftType: enums.PyType = left.getType();
-    var leftN: gLong;
-    switch (leftType) {
-      case enums.PyType.TYPE_INT:
-        leftN = gLong.fromInt((<PyInt> left).getValue());
-        break;
-      case enums.PyType.TYPE_TRUE:
-        leftN = gLong.fromInt(1);
-        break;
-      case enums.PyType.TYPE_FALSE:
-        leftN = gLong.fromInt(0);
-        break;
-      default:
-        throw new Exceptions.Exception("__radd__ param not TYPE_INT");
+    try{
+      var leftN: gLong = this.coercion(left);
+    }catch(e){
+      throw new Exceptions.Exception("TYPE_INT64 __radd__ unsuported parameter type");
     }
     var result: gLong = leftN.add(this.n);
     return new PyInt64(result);
+  }
+  private coercion(left: PyObject): gLong{
+    var leftType: enums.PyType = left.getType();
+    var leftN: number;
+    switch(leftType){
+      case enums.PyType.TYPE_INT:
+        leftN = (<PyInt> left).getValue();
+        break;
+      case enums.PyType.TYPE_TRUE:
+        leftN = 1;
+        break;
+      case enums.PyType.TYPE_FALSE:
+        leftN = 0;
+        break;
+      default:
+        throw new Exceptions.Exception("unsuported parameter type");
+    }
+    return gLong.fromInt(leftN);
   }
 }
 

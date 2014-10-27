@@ -85,18 +85,20 @@ class PyFrame {
   }
 
   //TODO: will fail on unimpl opcodes
-  private runOp(fw:FileWrapper): void{
+  private runOp(fw:FileWrapper): any{
     var currOpcode: number = fw.getUInt8();
+    var returnValue: any;
     //console.log(currOpcode);
     //this.last_i = fw.getOffset();
     if(this[enums.OpList[currOpcode]]) {
-      this[enums.OpList[currOpcode]].call(this, fw);
+      returnValue = this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
       this.tstate.stdout('opcode ' + currOpcode + ' = ' + enums.OpList[currOpcode]);
       throw new Exceptions.Exception("Opcode not impl");
     }
     this.last_i = fw.getOffset();
+    return returnValue;
   }
 
   private rot(n:number): void{
@@ -275,8 +277,8 @@ class PyFrame {
 
   //23
   private BINARY_ADD(fw: FileWrapper): void{
-    var left: PyObject = this.valueStack.pop();
     var right: PyObject = this.valueStack.pop();
+    var left: PyObject = this.valueStack.pop();
     var result: PyObject;
     try{
       result = left.__add__(right);

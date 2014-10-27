@@ -1,6 +1,9 @@
 import PyObject = require('./PyObject');
+import PyUnicode = require('./PyUnicode');
 import FileWrapper = require('./FileWrapper');
+import FileWrapperFactory = require('./FileWrapperFactory');
 import enums = require('./enums');
+import Exceptions = require('./Exceptions');
 
 class PyString extends PyObject{
   private fw: FileWrapper;
@@ -37,7 +40,39 @@ class PyString extends PyObject{
       throw "undefined comparison for type";
     }
   }
-
+  __add__(right: PyObject): PyString{
+    var rightS: string;
+    if(right.getType() === this.getType()){
+      rightS = (<PyString> right).__str__();
+    }else{
+      try{
+        rightS = this.coercion(right);
+      }catch(e){
+        throw new Exceptions.Exception("TYPE_STRING __add__ unsuported parameter type");
+      }
+    }
+    var result: string = this.__str__() + rightS;
+    return new PyString(FileWrapperFactory.fromString(result));
+    throw new Exceptions.Exception("TYPE_STRING __add__ unsuported parameter type");
+  }
+  __radd__(left: PyObject): PyString{
+    try{
+      var leftS: string = this.coercion(left);
+    }catch(e){
+      throw new Exceptions.Exception("TYPE_STRING __radd__ unsuported parameter type");
+    }
+    var result: string = leftS + this.__str__();
+    return new PyString(FileWrapperFactory.fromString(result));
+  }
+  private coercion(left: PyObject): string{
+    var leftType: enums.PyType = left.getType();
+    switch(leftType){
+      case enums.PyType.TYPE_UNICODE:
+        return (<PyUnicode> left).getUnicode();
+      default:
+        throw new Exceptions.Exception("unsuported parameter type");
+    }
+  }
 }
 
 export = PyString;
