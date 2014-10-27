@@ -19,8 +19,11 @@ class PyObject{
   __str__(): string{
     throw new Exceptions.Exception("__str__ not implemented");
   }
-  __add__(other: PyObject): PyObject{
+  __add__(right: PyObject): PyObject{
     throw new Exceptions.Exception("__add__ not implemented");
+  }
+  __radd__(left: PyObject): PyObject{
+    throw new Exceptions.Exception("__radd__ not implemented");
   }
 
   getValue(): any{
