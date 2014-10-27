@@ -44,7 +44,7 @@ class FileWrapperNode implements FileWrapper{
     return this.offset;
   }
   seek(offset: number){
-    if(offset < 0 || offset > this.buffer.length - 1){
+    if(offset < 0 || offset > this.buffer.length){
       throw 'invalid offset';
       return;
     }
