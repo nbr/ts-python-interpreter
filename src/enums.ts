@@ -29,7 +29,8 @@ export enum PyType{
   //added
   TYPE_FUNCTION = 22,
   TYPE_CELL = 23,
-  TYPE_ERROR = 24
+  TYPE_ERROR = 24,
+  TYPE_DICTITEM = 25
 }
 
 export enum PyErrorType{
@@ -60,6 +61,7 @@ export enum OpList {
   JUMP_FORWARD = 110,
   JUMP_ABSOLUTE = 113,
   POP_JUMP_IF_FALSE = 114,
+  LOAD_GLOBAL = 116,
   SETUP_LOOP = 120,
   LOAD_FAST = 124,
   STORE_FAST = 125,

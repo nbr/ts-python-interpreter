@@ -86,7 +86,8 @@ class PyFrame {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
     else{
-      throw "Missing impl of opcode " + currOpcode;
+      this.tstate.stdout('opcode ' + currOpcode + ' = ' + enums.OpList[currOpcode]);
+      throw new Exceptions.Exception("Opcode not impl");
     }
     this.last_i = fw.getOffset();
   }
@@ -264,6 +265,18 @@ class PyFrame {
   }
   */
 
+  //23
+  private BINARY_ADD(fw: FileWrapper): void{
+    var left: PyObject = this.valueStack.pop();
+    var right: PyObject = this.valueStack.pop();
+    var result: PyObject;
+    try{
+      result = left.__add__(right);
+    }catch(e){//TS says "Catch clause parameter cannot have a type annotation."
+      result = right.__radd__(left);
+    }
+    this.valueStack.push(result);
+  }
   //71
   private PRINT_ITEM(fw: FileWrapper): void{
     var i: PyObject = this.valueStack.pop();
@@ -379,7 +392,17 @@ class PyFrame {
     }
   }
   //116
-  private LOAD_GLOBAL() {
+  private LOAD_GLOBAL(fw: FileWrapper): void{
+    var index: number = fw.getUInt16();
+    var key: PyObject = this.code.getNames().getItem(index);
+    var value: PyObject = this.globals.get(key);
+    if(value === undefined){
+      value = this.builtins.get(key);
+    }
+    if(value === undefined){
+      throw new Exceptions.Exception(JSON.stringify(key) + " not defined");
+    }
+    this.valueStack.push(value);
   }
   //119
   private CONTINUE_LOOP(fw: FileWrapper): void{
@@ -445,6 +468,8 @@ class PyFrame {
     var frame: PyFrame = new PyFrame(func.getCode(), this.tstate);
     //TODO: This should be a temporary hack
     frame.f_localsplus = posParamArray;
+    //copy locals of this frame to globals of the one created
+    frame.globals = this.locals.shallowCopy();
     //TODO: Fill in frame fields using func
     this.tstate.frameStackPush(frame);
     var returnValue: PyObject = frame.evalFrame();
