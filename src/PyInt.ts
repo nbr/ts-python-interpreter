@@ -17,27 +17,26 @@ class PyInt extends PyObject{
   }
 
   __cmp__(cmpidx: number, comparee: PyObject): boolean{
-    var type = enums.PyType[this.getType()];
-    var exp = enums.Cmp[cmpidx];
-    if(type != enums.PyType[comparee.getType()]){ throw "type mismatch"; }
+    var type: string = enums.PyType[this.getType()];
+    if(type !== enums.PyType[comparee.getType()]){ throw "type mismatch"; }
     var a = this.getValue();
     var b = comparee.getValue();
-    if (exp == "PyCmp_LT") {
+    if (cmpidx === enums.Cmp.PyCmp_LT) {
       return a < b;
     }
-    else if (exp == "PyCmp_LE") {
+    else if (cmpidx === enums.Cmp.PyCmp_LE) {
       return a <= b;
     }
-    else if (exp == "PyCmp_EQ" || exp == "PyCmp_IS") {
-      return a == b;
+    else if (cmpidx === enums.Cmp.PyCmp_EQ || cmpidx === enums.Cmp.PyCmp_IS) {
+      return a === b;
     }
-    else if (exp == "PyCmp_NE" || exp == "PyCmp_IS_NOT") {
-      return a != b;
+    else if (cmpidx === enums.Cmp.PyCmp_NE || cmpidx === enums.Cmp.PyCmp_IS_NOT) {
+      return a !== b;
     }
-    else if (exp == "PyCmp_GT") {
+    else if (cmpidx === enums.Cmp.PyCmp_GT) {
       return a > b;
     }
-    else if (exp == "PyCmp_GE") {
+    else if (cmpidx === enums.Cmp.PyCmp_GE) {
       return a >= b;
     }
     else {

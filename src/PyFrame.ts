@@ -71,6 +71,7 @@ class PyFrame {
   //TODO: will fail on unimpl opcodes
   private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
+    this.last_i = fw.getOffset();
     if(this[enums.OpList[currOpcode]]) {
       this[enums.OpList[currOpcode]].call(this, fw);
     }
@@ -313,6 +314,22 @@ class PyFrame {
       this.valueStack.push(new PyFalse());
     }
   }
+
+  //110
+  private JUMP_FORWARD(fw: FileWrapper): void{
+    var jump: number = fw.getUInt16();
+    fw.seek(fw.getOffset() + jump);
+  }
+
+  //114
+  private POP_JUMP_IF_FALSE(fw: FileWrapper): void{
+    var value: boolean = this.valueStack.pop().getValue();
+    var jumpto: number = fw.getUInt16();
+    if(value == false){
+      fw.seek(jumpto);
+    }
+  }
+
   //116
   private LOAD_GLOBAL(fw: FileWrapper): void{
     var index: number = fw.getUInt16();

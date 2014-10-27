@@ -5,6 +5,11 @@ class PyTrue extends PyObject{
   constructor(){
     super(enums.PyType.TYPE_TRUE);
   }
+
+  getValue(): boolean{
+    return true;
+  }
+
 }
 
 export = PyTrue;

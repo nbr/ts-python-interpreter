@@ -23,16 +23,15 @@ class PyString extends PyObject{
   }
 
   __cmp__(cmpidx: number, comparee: PyObject): boolean{
-    var type = enums.PyType[this.getType()];
-    var exp = enums.Cmp[cmpidx];
-    if(type != enums.PyType[comparee.getType()]){ throw "type mismatch"; }
+    var type: string = enums.PyType[this.getType()];
+    if(type !== enums.PyType[comparee.getType()]){ throw "type mismatch"; }
     var a = this.getValue();
-    var b = this.getValue();
-    if (exp == "PyCmp_EQ" || exp == "PyCmp_IS") {
-      return a == b;
+    var b = comparee.getValue();
+    if (cmpidx === enums.Cmp.PyCmp_EQ || cmpidx === enums.Cmp.PyCmp_IS) {
+      return a === b;
     }
-    else if (exp == "PyCmp_NE" || exp == "PyCmp_IS_NOT") {
-      return a != b;
+    else if (cmpidx === enums.Cmp.PyCmp_NE || cmpidx === enums.Cmp.PyCmp_IS_NOT) {
+      return a !== b;
     }
     else {
       throw "undefined comparison for type";
