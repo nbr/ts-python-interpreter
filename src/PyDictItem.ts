@@ -15,6 +15,9 @@ class PyDictItem<K extends PyObject, V extends PyObject> extends PyObject{
   value(): V{
     return this.v;
   }
+  setValue(v: V){
+    this.v = v;
+  }
 }
 
 export = PyDictItem;

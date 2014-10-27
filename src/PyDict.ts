@@ -1,71 +1,72 @@
 import PyObject = require('./PyObject');
 import PyTuple = require('./PyTuple');
 import PyDictItem = require('./PyDictItem');
+import PyUnicode = require('./PyUnicode');
 import enums = require('./enums');
 
-//TODO: Fix
-//O(n) lookups and inserts yay! Wait, booooo!
 //tried to use https://github.com/flesler/hashmap
 //but no worky. I should copy the hash function.
 class PyDict<K extends PyObject, V extends PyObject> extends PyObject{
-  private keys: K[];
-  private values: V[];
+  private items: PyDictItem<K, V>[];
   private size: number;
   constructor(){
     super(enums.PyType.TYPE_DICT);
-    this.keys = new Array<K>();
-    this.values = new Array<V>();
+    this.items = new Array<PyDictItem<K, V>>();
     this.size = 0;
   }
   get(key: K): V{
-    var index: number = this.getKeyIndex(key);
-    if(index === -1){ return undefined; }
-    return this.values[index];
+    var h: string = this.hash(key);
+    if(this.items[h] === undefined){
+      return undefined;
+    }
+    return this.items[this.hash(key)].value();
   }
   put(key: K, value: V): void{
-    var index: number = this.getKeyIndex(key);
-    if(index === -1){
+    var h: string = this.hash(key);
+    if(this.items[h] === undefined){
       this.size++;
-      this.keys.push(key);
-      this.values.push(value);
-      return;
+      this.items[h] = new PyDictItem<K, V>(key,value);
     }
-    this.values[index] = value;
+    this.items[h].setValue(value);
   }
-  items(): Array<PyDictItem<K, V>>{
-    var a: Array<PyDictItem<K, V>> = new Array<PyDictItem<K, V>>();
-    for(var i: number = 0; i < this.keys.length; i++){
-      var di: PyDictItem<K, V> = new PyDictItem<K, V>(this.keys[i], this.values[i]);
-      a.push(di);
-    }
-    return a;
+  getItems(): Array<PyDictItem<K, V>>{
+    return this.items.slice(0);
   }
   shallowCopy(): PyDict<K, V>{
+    var cItems: Array<PyDictItem<K, V>> = new Array<PyDictItem<K, V>>();
+    for(var key in this.items){
+      if(this.items.hasOwnProperty(key)){
+        var i: PyDictItem<K, V> = this.items[key];
+        cItems[key] = new PyDictItem<K, V>(i.key(), i.value());
+      }
+    }
     var d: PyDict<K, V> = new PyDict<K, V>();
-    d.keys = this.keys.slice(0);
-    d.values = this.values.slice(0);
+    d.items = cItems;
     d.size = this.size;
     return d;
   }
   count(): number{
     return this.size;
   }
-  private getKeyIndex(key: K): number{
-    return this.keys.indexOf(key);
+  //TODO: hash function needs to be fixed
+  //for objects that do not override __str__()
+  private hash(key: K): string{
+    return key.__str__();
   }
 
   __str__(): string{
     var s = "{";
-    if(this.keys.length != this.values.length){
-      throw "uneven dict";
+    for(var hash in this.items){
+      if(this.items.hasOwnProperty(hash)){
+        s += "(";
+        s += "" + this.items[hash].key().__str__();
+        s += ": ";
+        s += this.items[hash].value().__str__();
+        s += "),";
+      }
     }
-    for(var i=0; i < this.keys.length; i++){
-      s += "(";
-      s += "" + this.keys[i];
-      s += ": ";
-      s += this.get(this.keys[i]);
-      if(i!=this.keys.length-1){ s += "),"; }
-      else{ s += ")"; }
+    if(this.size > 0){
+      s = s.slice(0,-1);
     }
     s += "}";
     return s;

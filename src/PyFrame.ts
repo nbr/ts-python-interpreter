@@ -85,7 +85,7 @@ class PyFrame {
   //TODO: will fail on unimpl opcodes
   private runOp(fw:FileWrapper): void{
     var currOpcode: number = fw.getUInt8();
-    console.log(currOpcode);
+    //console.log(currOpcode);
     //this.last_i = fw.getOffset();
     if(this[enums.OpList[currOpcode]]) {
       this[enums.OpList[currOpcode]].call(this, fw);
