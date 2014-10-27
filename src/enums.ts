@@ -25,12 +25,11 @@ export enum PyType{
   TYPE_DICT = 19,
   TYPE_FROZENSET = 20,
   TYPE_CODE = 21,
-
-  //added
   TYPE_FUNCTION = 22,
   TYPE_CELL = 23,
   TYPE_ERROR = 24,
-  TYPE_DICTITEM = 25
+  TYPE_DICTITEM = 25,
+  TYPE_ITER = 26
 }
 
 export enum PyErrorType{
@@ -48,14 +47,17 @@ export enum OpList {
   //UNARY_POSITIVE = 10,
   //UNARY_NEGATIVE = 11,
   //UNARY_NOT = 12,
-  BINARY_ADD = 23, //in progress PP
+  BINARY_ADD = 23,
+  GET_ITER = 68,
   PRINT_ITEM = 71,
   PRINT_NEWLINE = 72,
   PRINT_NEWLINE_TO = 73,
   RETURN_VALUE = 83,
   POP_BLOCK = 87,
   STORE_NAME = 90,
+  FOR_ITER = 93,
   LOAD_CONST = 100,
+  BUILD_LIST = 103,
   LOAD_NAME = 101,
   COMPARE_OP = 107,
   JUMP_FORWARD = 110,
