@@ -19,6 +19,7 @@ Running the Project
 npm start
 ```
 Visit [http://localhost:8080](http://localhost:8080) in a browser.
+Interpretation results can be seen in the developer tools console.
 Running Tests
 ---
 To run our functional test programs, run (from the root of project directory):
