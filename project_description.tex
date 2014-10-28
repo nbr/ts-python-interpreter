@@ -1,0 +1,43 @@
+\documentclass{article}
+\topmargin-2.0cm
+\usepackage{hyperref}
+\advance\oddsidemargin-0.65in
+\textheight9.2in
+\textwidth6.75in
+\begin{document}
+
+\begin{center}
+{\LARGE \bf CS 630 - Project 1}\\
+\vspace*{0.1cm}
+{\normalsize Nicholas Braga, Patrick Pegus II}
+\end{center}
+
+\section*{Approach}
+
+Our general approach was to first gain insight into the structure of PYC files, since this was our program's entry point. (For this we found [1] very helpful.) Our first goal was to correctly implement a code marshal parser such that we could manipulate code objects. After we were able to produce a Code Object class, we began the bulk work of our current System Design. Many of the ideas in [2] were helpful for this portion of the project. Since much of the work of our interpreter is in evaluation, we closely studied the functionality of \texttt{ceval.c} from CPython, in particular, the \texttt{EvalFrameEx} function. This also included implementing the various opcodes referenced from the switch statements of this function, which took the majority of our overall effort in the latter part of the project. We prioritized producing some useful programs rather than completeness of similar opcodes or more complex, less used opcodes, if we could not implement all of them.
+
+\section*{System Design}
+
+We decided it would be best to keep (as close to) the CPython System Design as possible. A class interaction diagram found in [2] was very useful for this. Currently, our implementation assumes \texttt{PyInterpreterState} and \texttt{PyThreadState} to be singular (while it is true that CPython can support multiple interpreters and multiple threads) though we designed in such a way that we can extend this. 
+
+Our interpreter reads (from the filesystem) a PYC file, and parses it (\texttt{PycParser}) to obtain the \texttt{magicno}, \texttt{timestamp}, and \texttt{codeobject} (\texttt{MarshalParser} using the \texttt{FileWrapperNode} class to read the bytecode). We then initialize \texttt{PyInterpreterState}, and associate it with/initialize a \texttt{PyThreadState} object. \texttt{PyThreadState} is associated with some number of \texttt{PyFrame} objects, where evaluation takes place. The initial code object passed to \texttt{PyThreadState} is then associated with a new \texttt{PyFrame} object, as each \texttt{PyFrame} is associated with a \texttt{CodeObject}. The \texttt{evalFrame} method is called from the constructor of \texttt{PyThreadState}, and this is where the first (and subsequent) evaluations will take place. If the initial \texttt{CodeObject} has nested code objects within it, then new \texttt{PyFrame} objects will be pushed to the \texttt{frameStack} of \texttt{PyThreadState}. (It is the \texttt{PyFrame} method \texttt{evalFrame} that follows \texttt{EvalFrameEx} of \texttt{ceval.c}.) Evaluation then begins, and our interpreter returns the final output when the \texttt{frameStack} is empty.
+
+
+\section*{Results}
+
+We initially attempted to produce a unit test suite run in the browser using QUnit, but we have currently not been able to finish this. We subsequently tried using \texttt{assert} of Node.JS but ultimately found that we should focus our effort elsewhere.
+
+We have instead implemented a number of functional tests; we did however find that writing these programs was helpful in understanding the opcode implementations. We wrote our own test programs, compiled them using \texttt{doc/pycompiler.py} and viewed the output using \texttt{doc/nedpycparser.py}. See \texttt{sample\_pycs} directory for these programs, and \texttt{README.md} for how to run them.
+
+\vspace{0.5cm}
+\begin{footnotesize}
+\begin{thebibliography}{}
+\bibliographystyle{}
+\bibitem[1]{ned}
+\url{http://nedbatchelder.com/blog/200804/the_structure_of_pyc_files.html}
+\bibitem[2]{innards}
+\url{http://tech.blog.aknin.name/category/my-projects/pythons-innards/}
+\end{thebibliography}
+\end{footnotesize}
+\end{document}
+\end{document}
