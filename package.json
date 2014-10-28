@@ -10,7 +10,8 @@
     "optimize-test": "node ./node_modules/requirejs/bin/r.js -o build-test.js",
     "compile-amd": "./node_modules/typescript/bin/tsc src/InterpretPyc.ts --outDir ./compiled --module amd",
     "optimize": "node ./node_modules/requirejs/bin/r.js -o build.js",
-    "start": "node ./compiled/src/main.js",
+    "main": "node ./compiled/src/main.js",
+    "start": "node app.js",
     "loop": "echo sample_pycs/*.py | xargs -n 1 ./doc/pycompiler.py && node ./compiled/src/loopAllPyc.js",
     "test-show": "./node_modules/grunt-cli/bin/grunt show-results",
     "debug": "./node_modules/node-inspector/bin/node-debug.js compiled/src/main.js"
@@ -20,6 +21,7 @@
     "requirejs": "2.1.15",
     "grunt-cli": "0.1.13",
     "async": "0.9.0",
+    "express": "3.5.0",
     "node-inspector": "0.7.4"
   },
   "devDependencies": {
