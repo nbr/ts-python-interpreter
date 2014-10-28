@@ -1,16 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
-
-    <head>
-        <meta charset="utf-8">
-
-        <meta name="viewport"   content="width=device-width; initial-scale=1.0; maximum-scale=1.0;">
-
-    </head>
-
-    <body>
-        <script type="text/javascript" src="build/js/base.min.js"></script>
-
-    </body>
-
+<html>
+<head>
+<!--<script src="compiled/lib/jquery-2.1.1.min.js" type="text/javascript"></script>-->
+  <script data-main="release/InterpretPyc" src="node_modules/requirejs/require.js"></script>
+  <script src="compiled/lib/browserfs.js" type="text/javascript"></script>
+</head>
+<body>
+  <h1>Python Interpreter Test</h1>
+  <input type="file" onchange="handleFiles(this.files)"></input>
+  <div id='out'>
+  </div>
+  <script type="text/javascript">
+    //http://www.html5rocks.com/en/tutorials/file/dndfiles/
+    function handleFiles(fileList){
+      //console.log(fileList);
+      //console.log(fileList[0]);
+      var reader = new FileReader();
+      reader.onload = (function(theFile){
+        return function(pyc){
+          console.log(pyc);
+          console.log(theFile.name);
+          console.log(pyc.target.result);
+          console.log(typeof(pyc.target.result));
+          localStorage.clear();
+          require(['compiled/src/InterpretPyc'], function(InterpretPyc){
+            BrowserFS.install(window);
+            InterpretPyc(new Buffer(pyc.target.result), function cb(){
+              console.log('done');
+            });
+          });
+        }
+      })(fileList[0]);
+      reader.readAsArrayBuffer(fileList[0]);
+    }
+  </script>
+</body>
 </html>
