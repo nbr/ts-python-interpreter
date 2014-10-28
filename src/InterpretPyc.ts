@@ -6,12 +6,10 @@ import PycParser = require('./PycParser');
 import PyInterpreterState = require('./PyInterpreterState');
 import StdoutBrowser = require('./StdoutBrowser');
 
-
-//Main?
 function InterpretPyc(buffer: NodeBuffer, cb: () => void){
   var fw: FileWrapper = new FileWrapperNode(buffer);
   var pyc: PycFile = PycParser.parse(fw);
-  console.log(pyc.stringify());
+  //console.log(pyc.stringify());
   return new PyInterpreterState(pyc.getCodeobj(), new StdoutBrowser());
   cb();
 }
