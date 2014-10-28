@@ -29,6 +29,14 @@ We initially attempted to produce a unit test suite run in the browser using QUn
 
 We have instead implemented a number of functional tests; we did however find that writing these programs was helpful in understanding the opcode implementations. We wrote our own test programs, compiled them using \texttt{doc/pycompiler.py} and viewed the output using \texttt{doc/nedpycparser.py}. See \texttt{sample\_pycs} directory for these programs, and \texttt{README.md} for how to run them.
 
+These tests demonstrate that our interpreter is \textit{minimally} capable of correctly interpreting:
+\begin{itemize}
+\item \texttt{for} loops
+\item \texttt{while} loops
+\item \texttt{if-else} conditionals
+\item \texttt{BINARY_ADD} operations
+\end{itemize}
+
 \vspace{0.5cm}
 \begin{footnotesize}
 \begin{thebibliography}{}
