@@ -35,7 +35,7 @@ That new \texttt{PyFrame} object will be pushed to the \texttt{frameStack} of \t
 
 We initially attempted to produce a unit test suite run in the browser using QUnit, but we have currently not been able to finish this. We subsequently tried using \texttt{assert} of Node.JS but ultimately found that we should focus our effort elsewhere.
 
-We have instead implemented a number of functional tests; we did however find that writing these programs was helpful in understanding the opcode implementations. We wrote our own test programs, compiled them using \texttt{doc/pycompiler.py} and viewed the output using \texttt{doc/nedpycparser.py}. See \texttt{sample\_pycs} directory for these programs, and \texttt{README.md} for how to run them.
+We have instead implemented a number of functional tests; we did however find that writing these programs was helpful in understanding the opcode implementations. We wrote our own test programs, compiled them using \texttt{doc/pycompiler.py} and disassemble using \texttt{doc/nedpycparser.py} for bytecode analysis. See \texttt{sample\_pycs} directory for these programs, and \texttt{README.md} for how to run them.
 
 These tests demonstrate that our interpreter is \textit{minimally} capable of correctly interpreting:
 \begin{itemize}
