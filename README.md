@@ -1,6 +1,9 @@
 ts-python-interpreter
 =====================
 **_ts-python-interpreter_** is a Python .pyc interpreter written in TypeScript.
+
+  Refer to `project_description.tex` for a more detailed overview. 
+
 Dependencies
 ---
 Requires node.js, npm, and the Unix shell commands echo and xargs
