@@ -14,7 +14,7 @@
 
 \section*{Approach}
 
-Our general approach was to first gain insight into the structure of PYC files, since this was our program's entry point. (For this we found [1] very helpful.) Our first goal was to correctly implement a code marshal parser such that we could manipulate code objects. After we were able to produce a \texttt{CodeObject} class, we began the bulk work of our current System Design. Many of the ideas in [2] were helpful for this portion of the project. Since much of the work of our interpreter is in evaluation, we closely studied the functionality of \texttt{ceval.c} from CPython, in particular, the \texttt{EvalFrameEx} function.
+Our general approach was to first gain insight into the structure of PYC files, since this was our program's entry point. (For this we found [1] very helpful.) Our first goal was to correctly implement a code marshal parser such that we could manipulate code objects. After we were able to produce a \texttllt{CodeObject} class, we began the bulk work of our current System Design. Many of the ideas in [2] were helpful for this portion of the project. Since much of the work of our interpreter is in evaluation, we closely studied the functionality of \texttt{ceval.c} from CPython, in particular, the \texttt{EvalFrameEx} function.
 This also included implementing the various opcodes referenced from the switch statements of this function, which took the majority of our overall effort in the latter part of the project. We prioritized producing some useful programs rather than completeness of similar opcodes or more complex, less used opcodes, if we could not implement all of them.
 
 We initially tried to mirror the functionality of CPython in our project, given that PYC files are specific to the CPython implementation. This included using similar data structures and populating
@@ -39,7 +39,7 @@ We have instead implemented a number of functional tests; we did however find th
 
 These tests demonstrate that our interpreter is \textit{minimally} capable of correctly interpreting:
 \begin{itemize}
-\item \texttt{for} loops
+\item \texttt{for} loops (over \texttt{list} objects)
 \item \texttt{while} loops
 \item \texttt{if-else} conditionals
 \item \texttt{BINARY\_ADD} operations
